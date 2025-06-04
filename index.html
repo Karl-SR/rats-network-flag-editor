@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <title>RATS Network - Clan Flag Editor</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <!-- Replaced Font Awesome Kit with CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztKQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     @font-face {
       font-family: 'Rockwell';
@@ -506,7 +505,7 @@
     let dragMode = true;
     let ratIntensity = 'high';
     let lastRatUpdate = 0;
-    const RAT_UPDATE_INTERVAL = 50;
+    const RAT_UPDATE_INTERVAL = 50; // Update rats every 50ms
 
     const palette = document.getElementById("palette");
     const selectedColorBox = document.getElementById("selected-color");
@@ -520,24 +519,13 @@
     const loadingSpinner = document.getElementById("loading-spinner");
     const ratContainer = document.getElementById('rat-container');
     let rats = [];
-    let selectedColorIndex = 0;
+    let selectedColorIndex = 0; // For keyboard navigation
 
     // Helper function to map Lua indices to paletteColors
     function getColorIndex(luaIndex) {
       if (luaIndex === 0) return 15;
       return luaIndex - 1;
     }
-
-    // Check if Font Awesome loaded
-    window.addEventListener('load', () => {
-      const icon = document.querySelector('.fas');
-      if (!icon || getComputedStyle(icon, ':before').content === 'none') {
-        console.error('Font Awesome icons failed to load. Please check the CDN link or your network connection.');
-        showError('Icons failed to load. Please refresh the page or disable ad blockers.');
-      } else {
-        console.log('Font Awesome icons loaded successfully.');
-      }
-    });
 
     // Rat Animation System
     const ratColors = ['#FF55FF', '#55FFFF', '#FF5555', '#55FF55', '#FFFF55', '#5555FF'];
@@ -547,7 +535,7 @@
       console.log(`Initializing ${ratIntensity} rat animation...`);
       ratContainer.innerHTML = '';
       rats = [];
-      const count = ratIntensity === 'high' ? 60 : 10;
+      const count = ratIntensity === 'high' ? 60 : 10; // Reduced low mode to 10 rats
       for (let i = 0; i < count; i++) {
         const rat = document.createElement('div');
         rat.className = 'rat';
@@ -577,6 +565,7 @@
       mouseY = e.clientY;
     });
 
+    // Touch support for mouse coordinates
     document.addEventListener('touchmove', e => {
       if (e.touches.length > 0) {
         mouseX = e.touches[0].clientX;
@@ -636,7 +625,7 @@
       swatch.className = "color";
       swatch.style.background = color;
       swatch.dataset.hex = color;
-      swatch.tabIndex = 0;
+      swatch.tabIndex = 0; // Make focusable
       swatch.onclick = () => {
         selectColor(i);
         clickSound.play();
@@ -661,6 +650,7 @@
       console.log(`Selected color: Lua index ${selectedColor} (paletteColors[${i}]: ${paletteColors[i]})`);
     }
 
+    // Keyboard Navigation for Palette
     document.addEventListener('keydown', e => {
       const swatches = document.querySelectorAll('.color');
       if (e.key === 'ArrowRight') {
@@ -698,7 +688,7 @@
           cell.style.background = paletteColors[colorIndex];
           cell.onmousedown = (e) => {
             e.preventDefault();
-            if (e.button === 2) {
+            if (e.button === 2) { // Right-click to pick color
               pickColorFromCell(r, c);
               return;
             }
@@ -762,6 +752,7 @@
               clickSound.play();
             }
           };
+          // Prevent context menu on right-click
           cell.oncontextmenu = (e) => {
             e.preventDefault();
             pickColorFromCell(r, c);
@@ -961,6 +952,7 @@
       showError('Flag saved as PNG!', false);
     }
 
+    // Keyboard Shortcuts
     document.addEventListener('keydown', e => {
       if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();
@@ -979,7 +971,7 @@
     // Initialize
     renderGrid();
     renderInGamePreview();
-    selectColor(0);
+    selectColor(0); // Initialize selected color
     saveState();
   </script>
 </body>
