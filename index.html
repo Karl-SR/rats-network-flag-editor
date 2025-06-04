@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>RATS Network - Clan Flag Editor</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     @font-face {
       font-family: 'Rockwell';
@@ -232,6 +231,9 @@
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
       z-index: 3;
       position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     button:hover {
@@ -438,15 +440,15 @@
 
   <div class="palette" id="palette"></div>
   <div class="button-group">
-    <button onclick="fillEntireGrid()" data-tooltip="Fill Entire Grid with Selected Color"><i class="fas fa-fill-drip"></i> Fill Grid</button>
-    <button onclick="clearGrid()" data-tooltip="Clear Grid to White"><i class="fas fa-eraser"></i> Clear Grid</button>
-    <button onclick="undo()" data-tooltip="Undo Last Action (Ctrl+Z)"><i class="fas fa-undo"></i> Undo</button>
-    <button onclick="redo()" data-tooltip="Redo Last Action (Ctrl+Y)"><i class="fas fa-redo"></i> Redo</button>
+    <button onclick="fillEntireGrid()" data-tooltip="Fill Entire Grid with Selected Color"><span>🖌️</span> Fill Grid</button>
+    <button onclick="clearGrid()" data-tooltip="Clear Grid to White"><span>🧹</span> Clear Grid</button>
+    <button onclick="undo()" data-tooltip="Undo Last Action (Ctrl+Z)"><span>⏪</span> Undo</button>
+    <button onclick="redo()" data-tooltip="Redo Last Action (Ctrl+Y)"><span>⏩</span> Redo</button>
     <button onclick="toggleDragMode()" data-tooltip="Toggle Drag to Paint Mode">
-      <i class="fas fa-paint-brush"></i> <span id="drag-mode-text">Drag to Paint: ON</span>
+      <span>🎨</span> <span id="drag-mode-text">Drag to Paint: ON</span>
     </button>
     <button onclick="toggleRats()" data-tooltip="Toggle Rat Animation Intensity">
-      <i class="fas fa-star"></i> <span id="rats-text">Rats: High</span>
+      <span>🐀</span> <span id="rats-text">Rats: High</span>
     </button>
   </div>
 
@@ -458,17 +460,17 @@
     <div class="panel">
       <h2>In-Game Preview</h2>
       <div class="preview-grid" id="in-game-preview"></div>
-      <button onclick="saveAsPNG()" data-tooltip="Save Flag as PNG (Ctrl+S)"><i class="fas fa-download"></i> Save as PNG</button>
+      <button onclick="saveAsPNG()" data-tooltip="Save Flag as PNG (Ctrl+S)"><span>💾</span> Save as PNG</button>
     </div>
   </div>
 
   <div class="panel">
     <h2>Lua Output</h2>
-    <button onclick="generateLuaTable()" data-tooltip="Generate Lua Table for Submission"><i class="fas fa-code"></i> Generate Lua Table</button>
-    <button onclick="copyLuaTable()" data-tooltip="Copy Lua Table to Clipboard"><i class="fas fa-copy"></i> Copy</button>
+    <button onclick="generateLuaTable()" data-tooltip="Generate Lua Table for Submission"><span>📜</span> Generate Lua Table</button>
+    <button onclick="copyLuaTable()" data-tooltip="Copy Lua Table to Clipboard"><span>📋</span> Copy</button>
     <div class="file-input-wrapper">
       <input type="file" id="lua-file" accept=".lua" onchange="loadLuaFile()">
-      <label for="lua-file" class="file-input-label" data-tooltip="Load Lua Table from File"><i class="fas fa-upload"></i> Load Lua File</label>
+      <label for="lua-file" class="file-input-label" data-tooltip="Load Lua Table from File"><span>📤</span> Load Lua File</label>
     </div>
     <div class="output" id="lua-output"></div>
     <div class="discord-note" id="discord-note" style="display: none">
@@ -505,7 +507,7 @@
     let dragMode = true;
     let ratIntensity = 'high';
     let lastRatUpdate = 0;
-    const RAT_UPDATE_INTERVAL = 50; // Update rats every 50ms
+    const RAT_UPDATE_INTERVAL = 50;
 
     const palette = document.getElementById("palette");
     const selectedColorBox = document.getElementById("selected-color");
@@ -519,7 +521,7 @@
     const loadingSpinner = document.getElementById("loading-spinner");
     const ratContainer = document.getElementById('rat-container');
     let rats = [];
-    let selectedColorIndex = 0; // For keyboard navigation
+    let selectedColorIndex = 0;
 
     // Helper function to map Lua indices to paletteColors
     function getColorIndex(luaIndex) {
@@ -535,7 +537,7 @@
       console.log(`Initializing ${ratIntensity} rat animation...`);
       ratContainer.innerHTML = '';
       rats = [];
-      const count = ratIntensity === 'high' ? 60 : 10; // Reduced low mode to 10 rats
+      const count = ratIntensity === 'high' ? 60 : 10;
       for (let i = 0; i < count; i++) {
         const rat = document.createElement('div');
         rat.className = 'rat';
@@ -565,7 +567,6 @@
       mouseY = e.clientY;
     });
 
-    // Touch support for mouse coordinates
     document.addEventListener('touchmove', e => {
       if (e.touches.length > 0) {
         mouseX = e.touches[0].clientX;
@@ -625,7 +626,7 @@
       swatch.className = "color";
       swatch.style.background = color;
       swatch.dataset.hex = color;
-      swatch.tabIndex = 0; // Make focusable
+      swatch.tabIndex = 0;
       swatch.onclick = () => {
         selectColor(i);
         clickSound.play();
@@ -650,7 +651,6 @@
       console.log(`Selected color: Lua index ${selectedColor} (paletteColors[${i}]: ${paletteColors[i]})`);
     }
 
-    // Keyboard Navigation for Palette
     document.addEventListener('keydown', e => {
       const swatches = document.querySelectorAll('.color');
       if (e.key === 'ArrowRight') {
@@ -688,7 +688,7 @@
           cell.style.background = paletteColors[colorIndex];
           cell.onmousedown = (e) => {
             e.preventDefault();
-            if (e.button === 2) { // Right-click to pick color
+            if (e.button === 2) {
               pickColorFromCell(r, c);
               return;
             }
@@ -752,7 +752,6 @@
               clickSound.play();
             }
           };
-          // Prevent context menu on right-click
           cell.oncontextmenu = (e) => {
             e.preventDefault();
             pickColorFromCell(r, c);
@@ -952,7 +951,6 @@
       showError('Flag saved as PNG!', false);
     }
 
-    // Keyboard Shortcuts
     document.addEventListener('keydown', e => {
       if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();
@@ -971,7 +969,7 @@
     // Initialize
     renderGrid();
     renderInGamePreview();
-    selectColor(0); // Initialize selected color
+    selectColor(0);
     saveState();
   </script>
 </body>
