@@ -89,6 +89,12 @@
       box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
 
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1.5em;
+      color: #E0E0E0;
+    }
+
     .palette {
       display: grid;
       grid-template-columns: repeat(8, 30px);
@@ -103,13 +109,24 @@
       border: 2px solid #FFFFFF;
       border-radius: 4px;
       box-sizing: border-box;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
       position: relative;
     }
 
     .color:hover {
       transform: scale(1.1);
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .color.selected {
+      border-color: #FF5555;
+      box-shadow: 0 0 12px rgba(255, 85, 85, 0.8);
+    }
+
+    .color:focus {
+      outline: none;
+      border-color: #FF5555;
+      box-shadow: 0 0 12px rgba(255, 85, 85, 0.8);
     }
 
     .color:hover::after {
@@ -167,6 +184,16 @@
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
 
+    .cell.painted {
+      animation: paintFeedback 0.2s ease;
+    }
+
+    @keyframes paintFeedback {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
     .cell:hover {
       transform: scale(1.05);
       box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
@@ -204,11 +231,18 @@
       transition: all 0.3s ease;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
       z-index: 3;
+      position: relative;
     }
 
     button:hover {
       background: linear-gradient(45deg, #3A3A3A, #555555);
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 15px rgba(255, 85, 85, 0.8);
+      border-color: #FF5555;
     }
 
     button:active {
@@ -218,6 +252,86 @@
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    button::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1A1A1A;
+      color: #FFFFFF;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    button:hover::after {
+      opacity: 1;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+    }
+
+    .file-input-wrapper .file-input-label {
+      background: linear-gradient(45deg, #1A1A1A, #3A3A3A);
+      color: #FFFFFF;
+      font-weight: 700;
+      padding: 10px 20px;
+      border: 2px solid #FFFFFF;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+
+    .file-input-wrapper .file-input-label:hover {
+      background: linear-gradient(45deg, #3A3A3A, #555555);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+
+    .file-input-wrapper .file-input-label::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1A1A1A;
+      color: #FFFFFF;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .file-input-wrapper .file-input-label:hover::after {
+      opacity: 1;
     }
 
     .discord-note {
@@ -287,7 +401,7 @@
       h1 {
         font-size: 2em;
       }
-      button {
+      button, .file-input-wrapper .file-input-label {
         padding: 8px 15px;
       }
     }
@@ -324,14 +438,14 @@
 
   <div class="palette" id="palette"></div>
   <div class="button-group">
-    <button onclick="fillEntireGrid()"><i class="fas fa-fill-drip"></i> Fill Grid</button>
-    <button onclick="clearGrid()"><i class="fas fa-eraser"></i> Clear Grid</button>
-    <button onclick="undo()"><i class="fas fa-undo"></i> Undo</button>
-    <button onclick="redo()"><i class="fas fa-redo"></i> Redo</button>
-    <button onclick="toggleDragMode()">
+    <button onclick="fillEntireGrid()" data-tooltip="Fill Entire Grid with Selected Color"><i class="fas fa-fill-drip"></i> Fill Grid</button>
+    <button onclick="clearGrid()" data-tooltip="Clear Grid to White"><i class="fas fa-eraser"></i> Clear Grid</button>
+    <button onclick="undo()" data-tooltip="Undo Last Action (Ctrl+Z)"><i class="fas fa-undo"></i> Undo</button>
+    <button onclick="redo()" data-tooltip="Redo Last Action (Ctrl+Y)"><i class="fas fa-redo"></i> Redo</button>
+    <button onclick="toggleDragMode()" data-tooltip="Toggle Drag to Paint Mode">
       <i class="fas fa-paint-brush"></i> <span id="drag-mode-text">Drag to Paint: ON</span>
     </button>
-    <button onclick="toggleRats()">
+    <button onclick="toggleRats()" data-tooltip="Toggle Rat Animation Intensity">
       <i class="fas fa-star"></i> <span id="rats-text">Rats: High</span>
     </button>
   </div>
@@ -344,15 +458,18 @@
     <div class="panel">
       <h2>In-Game Preview</h2>
       <div class="preview-grid" id="in-game-preview"></div>
-      <button onclick="saveAsPNG()"><i class="fas fa-download"></i> Save as PNG</button>
+      <button onclick="saveAsPNG()" data-tooltip="Save Flag as PNG (Ctrl+S)"><i class="fas fa-download"></i> Save as PNG</button>
     </div>
   </div>
 
   <div class="panel">
     <h2>Lua Output</h2>
-    <button onclick="generateLuaTable()"><i class="fas fa-code"></i> Generate Lua Table</button>
-    <button onclick="copyLuaTable()"><i class="fas fa-copy"></i> Copy</button>
-    <input type="file" id="lua-file" accept=".lua" onchange="loadLuaFile()">
+    <button onclick="generateLuaTable()" data-tooltip="Generate Lua Table for Submission"><i class="fas fa-code"></i> Generate Lua Table</button>
+    <button onclick="copyLuaTable()" data-tooltip="Copy Lua Table to Clipboard"><i class="fas fa-copy"></i> Copy</button>
+    <div class="file-input-wrapper">
+      <input type="file" id="lua-file" accept=".lua" onchange="loadLuaFile()">
+      <label for="lua-file" class="file-input-label" data-tooltip="Load Lua Table from File"><i class="fas fa-upload"></i> Load Lua File</label>
+    </div>
     <div class="output" id="lua-output"></div>
     <div class="discord-note" id="discord-note" style="display: none">
       Please copy and send the above Lua table to <strong>@karl_sr</strong> on Discord and we will get your flag added as soon as possible!
@@ -380,13 +497,15 @@
       "#FFFF3F", // 14: Yellow
       "#FFFFFF"  // 15: White
     ];
-    const gridData = Array.from({ length: 5 }, () => Array(12).fill(16)); // Changed default to 16 (White after offset)
-    let selectedColor = 1; // Default to index 1 (renders as paletteColors[0])
+    const gridData = Array.from({ length: 5 }, () => Array(12).fill(16));
+    let selectedColor = 1;
     let isPainting = false;
     let history = [];
     let historyIndex = -1;
     let dragMode = true;
     let ratIntensity = 'high';
+    let lastRatUpdate = 0;
+    const RAT_UPDATE_INTERVAL = 50; // Update rats every 50ms
 
     const palette = document.getElementById("palette");
     const selectedColorBox = document.getElementById("selected-color");
@@ -400,11 +519,12 @@
     const loadingSpinner = document.getElementById("loading-spinner");
     const ratContainer = document.getElementById('rat-container');
     let rats = [];
+    let selectedColorIndex = 0; // For keyboard navigation
 
     // Helper function to map Lua indices to paletteColors
     function getColorIndex(luaIndex) {
-      if (luaIndex === 0) return 15; // Map index 0 to paletteColors[15] (White)
-      return luaIndex - 1; // Offset by -1 for indices 1–15
+      if (luaIndex === 0) return 15;
+      return luaIndex - 1;
     }
 
     // Rat Animation System
@@ -415,7 +535,7 @@
       console.log(`Initializing ${ratIntensity} rat animation...`);
       ratContainer.innerHTML = '';
       rats = [];
-      const count = ratIntensity === 'high' ? 60 : 20;
+      const count = ratIntensity === 'high' ? 60 : 10; // Reduced low mode to 10 rats
       for (let i = 0; i < count; i++) {
         const rat = document.createElement('div');
         rat.className = 'rat';
@@ -445,7 +565,21 @@
       mouseY = e.clientY;
     });
 
-    function animateRats() {
+    // Touch support for mouse coordinates
+    document.addEventListener('touchmove', e => {
+      if (e.touches.length > 0) {
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+      }
+    });
+
+    function animateRats(timestamp) {
+      if (timestamp - lastRatUpdate < RAT_UPDATE_INTERVAL) {
+        requestAnimationFrame(animateRats);
+        return;
+      }
+      lastRatUpdate = timestamp;
+
       rats.forEach(rat => {
         const dx = mouseX - rat.x;
         const dy = mouseY - rat.y;
@@ -480,23 +614,66 @@
     }
 
     initRats();
-    animateRats();
+    requestAnimationFrame(animateRats);
 
     // Audio for interactions
     const clickSound = new Audio('https://www.freesound.org/data/previews/171/171670_1015242-lq.mp3');
 
-    // Palette Setup
+    // Palette Setup with Keyboard Navigation
     paletteColors.forEach((color, i) => {
       const swatch = document.createElement("div");
       swatch.className = "color";
       swatch.style.background = color;
       swatch.dataset.hex = color;
+      swatch.tabIndex = 0; // Make focusable
       swatch.onclick = () => {
-        selectedColor = i + 1; // Adjust for Lua index (paletteColors[i] becomes Lua index i+1)
-        selectedColorBox.style.background = paletteColors[i];
+        selectColor(i);
         clickSound.play();
       };
+      swatch.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectColor(i);
+          clickSound.play();
+        }
+      };
       palette.appendChild(swatch);
+    });
+
+    function selectColor(i) {
+      selectedColor = i + 1;
+      selectedColorBox.style.background = paletteColors[i];
+      selectedColorIndex = i;
+      const swatches = document.querySelectorAll('.color');
+      swatches.forEach(s => s.classList.remove('selected'));
+      swatches[i].classList.add('selected');
+      console.log(`Selected color: Lua index ${selectedColor} (paletteColors[${i}]: ${paletteColors[i]})`);
+    }
+
+    // Keyboard Navigation for Palette
+    document.addEventListener('keydown', e => {
+      const swatches = document.querySelectorAll('.color');
+      if (e.key === 'ArrowRight') {
+        selectedColorIndex = (selectedColorIndex + 1) % paletteColors.length;
+        swatches[selectedColorIndex].focus();
+        selectColor(selectedColorIndex);
+        clickSound.play();
+      } else if (e.key === 'ArrowLeft') {
+        selectedColorIndex = (selectedColorIndex - 1 + paletteColors.length) % paletteColors.length;
+        swatches[selectedColorIndex].focus();
+        selectColor(selectedColorIndex);
+        clickSound.play();
+      } else if (e.key === 'ArrowDown') {
+        selectedColorIndex = (selectedColorIndex + 8) % paletteColors.length;
+        swatches[selectedColorIndex].focus();
+        selectColor(selectedColorIndex);
+        clickSound.play();
+      } else if (e.key === 'ArrowUp') {
+        selectedColorIndex = (selectedColorIndex - 8 + paletteColors.length) % paletteColors.length;
+        swatches[selectedColorIndex].focus();
+        selectColor(selectedColorIndex);
+        clickSound.play();
+      }
     });
 
     function renderGrid() {
@@ -509,10 +686,26 @@
           const colorIndex = getColorIndex(gridData[r][c]);
           console.log(`Grid [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
           cell.style.background = paletteColors[colorIndex];
-          cell.onmousedown = () => {
+          cell.onmousedown = (e) => {
+            e.preventDefault();
+            if (e.button === 2) { // Right-click to pick color
+              pickColorFromCell(r, c);
+              return;
+            }
             isPainting = true;
             gridData[r][c] = selectedColor;
             cell.style.background = paletteColors[getColorIndex(selectedColor)];
+            cell.classList.add('painted');
+            saveState();
+            renderInGamePreview();
+            clickSound.play();
+          };
+          cell.ontouchstart = (e) => {
+            e.preventDefault();
+            isPainting = true;
+            gridData[r][c] = selectedColor;
+            cell.style.background = paletteColors[getColorIndex(selectedColor)];
+            cell.classList.add('painted');
             saveState();
             renderInGamePreview();
             clickSound.play();
@@ -521,25 +714,63 @@
             if (isPainting && dragMode) {
               gridData[r][c] = selectedColor;
               cell.style.background = paletteColors[getColorIndex(selectedColor)];
+              cell.classList.add('painted');
               saveState();
               renderInGamePreview();
               clickSound.play();
             }
           };
+          cell.ontouchmove = (e) => {
+            if (isPainting && dragMode) {
+              const touch = e.touches[0];
+              const target = document.elementFromPoint(touch.clientX, touch.clientY);
+              if (target && target.classList.contains('cell')) {
+                const cells = Array.from(flagGrid.children);
+                const index = cells.indexOf(target);
+                if (index !== -1) {
+                  const tr = Math.floor(index / 12);
+                  const tc = index % 12;
+                  gridData[tr][tc] = selectedColor;
+                  target.style.background = paletteColors[getColorIndex(selectedColor)];
+                  target.classList.add('painted');
+                  saveState();
+                  renderInGamePreview();
+                  clickSound.play();
+                }
+              }
+            }
+          };
           cell.onmouseup = () => isPainting = false;
+          cell.ontouchend = () => isPainting = false;
           cell.onclick = () => {
             if (!dragMode) {
               gridData[r][c] = selectedColor;
               cell.style.background = paletteColors[getColorIndex(selectedColor)];
+              cell.classList.add('painted');
               saveState();
               renderInGamePreview();
               clickSound.play();
             }
+          };
+          // Prevent context menu on right-click
+          cell.oncontextmenu = (e) => {
+            e.preventDefault();
+            pickColorFromCell(r, c);
           };
           flagGrid.appendChild(cell);
         }
       }
       document.body.onmouseup = () => isPainting = false;
+      document.body.ontouchend = () => isPainting = false;
+      document.body.onmouseleave = () => isPainting = false;
+    }
+
+    function pickColorFromCell(r, c) {
+      const luaIndex = gridData[r][c];
+      const colorIndex = getColorIndex(luaIndex);
+      selectColor(colorIndex);
+      showError(`Picked color: ${paletteColors[colorIndex]}`, false);
+      console.log(`Picked color from cell [${r}][${c}]: Lua index ${luaIndex} (paletteColors[${colorIndex}]: ${paletteColors[colorIndex]})`);
     }
 
     function renderInGamePreview() {
@@ -616,7 +847,7 @@
     function clearGrid() {
       for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 12; c++) {
-          gridData[r][c] = 16; // White after offset
+          gridData[r][c] = 16;
         }
       }
       renderGrid();
@@ -669,7 +900,7 @@
             matches.forEach((index, i) => {
               const r = Math.floor(i / 12);
               const c = i % 12;
-              if (index >= 0 && index <= 16) { // Allow 0–16 for Lua indices
+              if (index >= 0 && index <= 16) {
                 gridData[r][c] = index;
               } else {
                 throw new Error('Invalid color index');
@@ -679,6 +910,7 @@
             renderInGamePreview();
             saveState();
             loadingSpinner.style.display = 'none';
+            showError('Lua file loaded successfully!', false);
           } else {
             loadingSpinner.style.display = 'none';
             showError('Invalid Lua file format or wrong grid size.');
@@ -694,7 +926,7 @@
 
     function showError(message, isError = true) {
       errorPopup.textContent = message;
-      errorPopup.style.background = isError ? 'rgba(50, 50, 50, 0.9)' : 'rgba(43, 43, 43, 0.9)';
+      errorPopup.style.background = isError ? 'rgba(80, 0, 0, 0.9)' : 'rgba(0, 80, 0, 0.9)';
       errorPopup.style.display = 'block';
       setTimeout(() => {
         errorPopup.style.display = 'none';
@@ -717,6 +949,7 @@
       link.href = canvas.toDataURL();
       link.click();
       clickSound.play();
+      showError('Flag saved as PNG!', false);
     }
 
     // Keyboard Shortcuts
@@ -738,7 +971,7 @@
     // Initialize
     renderGrid();
     renderInGamePreview();
-    selectedColorBox.style.background = paletteColors[0]; // paletteColors[0] for Lua index 1
+    selectColor(0); // Initialize selected color
     saveState();
   </script>
 </body>
