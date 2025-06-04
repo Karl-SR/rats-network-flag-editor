@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>RATS Network - Clan Flag Editor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     @font-face {
       font-family: 'Rockwell';
@@ -14,20 +15,55 @@
 
     body {
       margin: 0;
-      background: #1e1e1e;
-      color: #eee;
+      background: #000000;
+      color: #FFFFFF;
       font-family: 'Poppins', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 30px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #rat-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .rat {
+      position: absolute;
+      font-size: 20px;
+      user-select: none;
+      transition: transform 0.1s linear, opacity 0.5s ease;
     }
 
     h1 {
-      color: #ff55ff;
-      font-size: 2em;
-      margin-bottom: 10px;
+      color: #FFFFFF;
+      font-size: 2.5em;
+      margin-bottom: 20px;
       font-family: 'Rockwell', 'Poppins', serif;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+      transition: transform 0.3s ease;
+      z-index: 3;
+    }
+
+    h1:hover {
+      transform: scale(1.05);
     }
 
     .container {
@@ -39,39 +75,73 @@
     }
 
     .panel {
-      background: #2b2b2b;
+      background: rgba(43, 43, 43, 0.9);
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 0 12px rgba(255, 85, 255, 0.2);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      border: 1px solid #444444;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      z-index: 1;
+    }
+
+    .panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
 
     .palette {
       display: grid;
       grid-template-columns: repeat(8, 30px);
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .color {
       width: 30px;
       height: 30px;
       cursor: pointer;
-      border: 2px solid #444;
+      border: 2px solid #FFFFFF;
+      border-radius: 4px;
       box-sizing: border-box;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .color:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .color:hover::after {
+      content: attr(data-hex);
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1A1A1A;
+      color: #FFFFFF;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      z-index: 10;
     }
 
     .selected-preview {
-      margin-top: 10px;
+      margin: 20px 0;
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
+      font-weight: 600;
+      color: #E0E0E0;
+      z-index: 3;
     }
 
     .preview-box {
       width: 20px;
       height: 20px;
-      border: 2px solid #fff;
+      border: 2px solid #FFFFFF;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
     }
 
     .grid {
@@ -85,6 +155,8 @@
       display: grid;
       grid-template-columns: repeat(12, 30px);
       grid-template-rows: repeat(10, 30px);
+      gap: 0;
+      z-index: 1;
     }
 
     .cell {
@@ -92,6 +164,12 @@
       height: 30px;
       border: 1px solid #555;
       cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
     }
 
     .preview-cell {
@@ -102,41 +180,161 @@
 
     .output {
       background: #121212;
-      padding: 10px;
+      padding: 15px;
       border-radius: 8px;
       white-space: pre;
       margin-top: 20px;
       max-width: 100%;
       overflow-x: auto;
       font-family: 'Rockwell', monospace;
+      color: #E0E0E0;
+      border: 1px solid #444444;
     }
 
     button {
-      background: #ff55ff;
-      color: black;
-      font-weight: bold;
+      background: linear-gradient(45deg, #1A1A1A, #3A3A3A);
+      color: #FFFFFF;
+      font-weight: 700;
       padding: 10px 20px;
-      border: none;
+      border: 2px solid #FFFFFF;
       border-radius: 8px;
       cursor: pointer;
       margin: 5px;
       font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      z-index: 3;
+    }
+
+    button:hover {
+      background: linear-gradient(45deg, #3A3A3A, #555555);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .discord-note {
       font-size: 0.9em;
-      color: #bbb;
-      margin-top: 10px;
+      color: #BBBBBB;
+      margin-top: 15px;
+      font-style: italic;
+      z-index: 3;
+    }
+
+    #error-popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(43, 43, 43, 0.9);
+      color: #FFFFFF;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      display: none;
+      z-index: 1000;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    #loading-spinner {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      border: 5px solid #FFFFFF;
+      border-top: 5px solid #555555;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 1000;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 10px 0;
+      z-index: 3;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .palette {
+        grid-template-columns: repeat(4, 30px);
+      }
+      h1 {
+        font-size: 2em;
+      }
+      button {
+        padding: 8px 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .palette {
+        grid-template-columns: repeat(2, 30px);
+      }
+      .grid {
+        grid-template-columns: repeat(12, calc((100vw - 60px) / 12));
+        grid-template-rows: repeat(5, calc((100vw - 60px) / 12));
+      }
+      .preview-grid {
+        grid-template-columns: repeat(12, calc((100vw - 60px) / 12));
+        grid-template-rows: repeat(10, calc((100vw - 60px) / 12));
+        gap: 0;
+      }
+      .cell, .preview-cell {
+        width: calc((100vw - 60px) / 12);
+        height: calc((100vw - 60px) / 12);
+      }
     }
   </style>
 </head>
 <body>
+  <div id="rat-container"></div>
+  <div id="error-popup"></div>
+  <div id="loading-spinner"></div>
   <h1>RATS Network - Clan Flag Editor</h1>
+
   <div class="selected-preview">
-    Selected Color: <div class="preview-box" id="selected-color"></div>
+    <strong>Selected Color:</strong> <div class="preview-box" id="selected-color"></div>
   </div>
+
   <div class="palette" id="palette"></div>
-  <button onclick="fillEntireGrid()">Fill Grid with Selected Color</button>
+  <div class="button-group">
+    <button onclick="fillEntireGrid()"><i class="fas fa-fill-drip"></i> Fill Grid</button>
+    <button onclick="clearGrid()"><i class="fas fa-eraser"></i> Clear Grid</button>
+    <button onclick="undo()"><i class="fas fa-undo"></i> Undo</button>
+    <button onclick="redo()"><i class="fas fa-redo"></i> Redo</button>
+    <button onclick="toggleDragMode()">
+      <i class="fas fa-paint-brush"></i> <span id="drag-mode-text">Drag to Paint: ON</span>
+    </button>
+    <button onclick="toggleRats()">
+      <i class="fas fa-star"></i> <span id="rats-text">Rats: High</span>
+    </button>
+  </div>
 
   <div class="container">
     <div class="panel">
@@ -146,13 +344,15 @@
     <div class="panel">
       <h2>In-Game Preview</h2>
       <div class="preview-grid" id="in-game-preview"></div>
-      <button onclick="saveAsPNG()">Save as PNG</button>
+      <button onclick="saveAsPNG()"><i class="fas fa-download"></i> Save as PNG</button>
     </div>
   </div>
 
   <div class="panel">
-    <button onclick="generateLuaTable()">Generate Lua Table</button>
-    <button onclick="copyLuaTable()">Copy to Clipboard</button>
+    <h2>Lua Output</h2>
+    <button onclick="generateLuaTable()"><i class="fas fa-code"></i> Generate Lua Table</button>
+    <button onclick="copyLuaTable()"><i class="fas fa-copy"></i> Copy</button>
+    <input type="file" id="lua-file" accept=".lua" onchange="loadLuaFile()">
     <div class="output" id="lua-output"></div>
     <div class="discord-note" id="discord-note" style="display: none">
       Please copy and send the above Lua table to <strong>@karl_sr</strong> on Discord and we will get your flag added as soon as possible!
@@ -163,14 +363,30 @@
 
   <script>
     const paletteColors = [
-      "#000000", "#0000AA", "#00AA00", "#00AAAA",
-      "#AA0000", "#AA00AA", "#AA5500", "#AAAAAA",
-      "#555555", "#5555FF", "#55FF55", "#55FFFF",
-      "#FF5555", "#FF55FF", "#FFFF55", "#FFFFFF"
+      "#000000", // 0: Black
+      "#00007F", // 1: Dark Blue
+      "#007F00", // 2: Dark Green
+      "#007F7F", // 3: Dark Cyan
+      "#7F0000", // 4: Dark Red
+      "#7F007F", // 5: Dark Purple
+      "#7F3F00", // 6: Dark Orange/Brown
+      "#7F7F7F", // 7: Light Gray
+      "#3F3F3F", // 8: Dark Gray
+      "#3F3FFF", // 9: Light Blue
+      "#3FFF3F", // 10: Light Green
+      "#3FFFFF", // 11: Light Cyan
+      "#FF3F3F", // 12: Light Red
+      "#FF3FFF", // 13: Magenta
+      "#FFFF3F", // 14: Yellow
+      "#FFFFFF"  // 15: White
     ];
-    const gridData = Array.from({ length: 5 }, () => Array(12).fill(13));
-    let selectedColor = 0;
+    const gridData = Array.from({ length: 5 }, () => Array(12).fill(16)); // Changed default to 16 (White after offset)
+    let selectedColor = 1; // Default to index 1 (renders as paletteColors[0])
     let isPainting = false;
+    let history = [];
+    let historyIndex = -1;
+    let dragMode = true;
+    let ratIntensity = 'high';
 
     const palette = document.getElementById("palette");
     const selectedColorBox = document.getElementById("selected-color");
@@ -180,39 +396,146 @@
     const discordNote = document.getElementById("discord-note");
     const canvas = document.getElementById("flag-canvas");
     const ctx = canvas.getContext("2d");
+    const errorPopup = document.getElementById("error-popup");
+    const loadingSpinner = document.getElementById("loading-spinner");
+    const ratContainer = document.getElementById('rat-container');
+    let rats = [];
 
+    // Helper function to map Lua indices to paletteColors
+    function getColorIndex(luaIndex) {
+      if (luaIndex === 0) return 15; // Map index 0 to paletteColors[15] (White)
+      return luaIndex - 1; // Offset by -1 for indices 1–15
+    }
+
+    // Rat Animation System
+    const ratColors = ['#FF55FF', '#55FFFF', '#FF5555', '#55FF55', '#FFFF55', '#5555FF'];
+    let mouseX = 0, mouseY = 0;
+
+    function initRats() {
+      console.log(`Initializing ${ratIntensity} rat animation...`);
+      ratContainer.innerHTML = '';
+      rats = [];
+      const count = ratIntensity === 'high' ? 60 : 20;
+      for (let i = 0; i < count; i++) {
+        const rat = document.createElement('div');
+        rat.className = 'rat';
+        rat.textContent = '🐀';
+        rat.style.color = ratColors[Math.floor(Math.random() * ratColors.length)];
+        const isForeground = Math.random() < 0.3;
+        rat.style.zIndex = isForeground ? 2 : -1;
+        rat.style.opacity = isForeground ? 0.6 : 0.3;
+        rat.style.fontSize = `${15 + Math.random() * (isForeground ? 25 : 15)}px`;
+        ratContainer.appendChild(rat);
+        rats.push({
+          element: rat,
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          rotation: Math.random() * 360,
+          scale: 0.8 + Math.random() * 0.4,
+          fade: 0.3 + Math.random() * 0.4
+        });
+      }
+      console.log(`Created ${rats.length} rats`);
+    }
+
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function animateRats() {
+      rats.forEach(rat => {
+        const dx = mouseX - rat.x;
+        const dy = mouseY - rat.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 200) {
+          const force = (200 - dist) * 0.01;
+          rat.vx += (dx / dist) * force;
+          rat.vy += (dy / dist) * force;
+        }
+        rat.x += rat.vx;
+        rat.y += rat.vy;
+        if (rat.x < 0 || rat.x > window.innerWidth) rat.vx *= -1;
+        if (rat.y < 0 || rat.y > window.innerHeight) rat.vy *= -1;
+        rat.rotation += (Math.random() - 0.5) * 10;
+        rat.scale = 0.8 + Math.sin(Date.now() * 0.002 + rat.x) * 0.2;
+        rat.fade = 0.3 + Math.sin(Date.now() * 0.003 + rat.y) * 0.3;
+        rat.element.style.transform = `translate(${rat.x}px, ${rat.y}px) rotate(${rat.rotation}deg) scale(${rat.scale})`;
+        rat.element.style.opacity = rat.fade;
+      });
+      requestAnimationFrame(animateRats);
+    }
+
+    window.addEventListener('resize', () => {
+      initRats();
+    });
+
+    function toggleRats() {
+      ratIntensity = ratIntensity === 'high' ? 'low' : 'high';
+      document.getElementById('rats-text').textContent = `Rats: ${ratIntensity.charAt(0).toUpperCase() + ratIntensity.slice(1)}`;
+      initRats();
+      clickSound.play();
+    }
+
+    initRats();
+    animateRats();
+
+    // Audio for interactions
+    const clickSound = new Audio('https://www.freesound.org/data/previews/171/171670_1015242-lq.mp3');
+
+    // Palette Setup
     paletteColors.forEach((color, i) => {
       const swatch = document.createElement("div");
       swatch.className = "color";
       swatch.style.background = color;
+      swatch.dataset.hex = color;
       swatch.onclick = () => {
-        selectedColor = i;
-        selectedColorBox.style.background = color;
+        selectedColor = i + 1; // Adjust for Lua index (paletteColors[i] becomes Lua index i+1)
+        selectedColorBox.style.background = paletteColors[i];
+        clickSound.play();
       };
       palette.appendChild(swatch);
     });
 
     function renderGrid() {
+      console.log('Rendering flag grid...');
       flagGrid.innerHTML = '';
       for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 12; c++) {
           const cell = document.createElement("div");
           cell.className = "cell";
-          cell.style.background = paletteColors[gridData[r][c]];
+          const colorIndex = getColorIndex(gridData[r][c]);
+          console.log(`Grid [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
+          cell.style.background = paletteColors[colorIndex];
           cell.onmousedown = () => {
             isPainting = true;
             gridData[r][c] = selectedColor;
-            cell.style.background = paletteColors[selectedColor];
+            cell.style.background = paletteColors[getColorIndex(selectedColor)];
+            saveState();
             renderInGamePreview();
+            clickSound.play();
           };
           cell.onmouseover = () => {
-            if (isPainting) {
+            if (isPainting && dragMode) {
               gridData[r][c] = selectedColor;
-              cell.style.background = paletteColors[selectedColor];
+              cell.style.background = paletteColors[getColorIndex(selectedColor)];
+              saveState();
               renderInGamePreview();
+              clickSound.play();
             }
           };
           cell.onmouseup = () => isPainting = false;
+          cell.onclick = () => {
+            if (!dragMode) {
+              gridData[r][c] = selectedColor;
+              cell.style.background = paletteColors[getColorIndex(selectedColor)];
+              saveState();
+              renderInGamePreview();
+              clickSound.play();
+            }
+          };
           flagGrid.appendChild(cell);
         }
       }
@@ -220,46 +543,171 @@
     }
 
     function renderInGamePreview() {
+      console.log('Rendering in-game preview...');
       inGamePreview.innerHTML = '';
+      let cellCount = 0;
       for (let r = 0; r < 5; r++) {
         for (let repeat = 0; repeat < 2; repeat++) {
           for (let c = 0; c < 12; c++) {
             const cell = document.createElement("div");
             cell.className = "preview-cell";
-            cell.style.background = paletteColors[gridData[r][c]];
+            const colorIndex = getColorIndex(gridData[r][c]);
+            console.log(`Preview [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
+            cell.style.background = paletteColors[colorIndex];
             inGamePreview.appendChild(cell);
+            cellCount++;
           }
         }
       }
+      console.log(`Appended ${cellCount} cells to in-game preview`);
+    }
+
+    function saveState() {
+      const state = gridData.map(row => [...row]);
+      history = history.slice(0, historyIndex + 1);
+      history.push(state);
+      historyIndex++;
+      updateUndoRedoButtons();
+    }
+
+    function undo() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        gridData.forEach((row, r) => {
+          row.forEach((_, c) => {
+            gridData[r][c] = history[historyIndex][r][c];
+          });
+        });
+        renderGrid();
+        renderInGamePreview();
+        updateUndoRedoButtons();
+        clickSound.play();
+      }
+    }
+
+    function redo() {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        gridData.forEach((row, r) => {
+          row.forEach((_, c) => {
+            gridData[r][c] = history[historyIndex][r][c];
+          });
+        });
+        renderGrid();
+        renderInGamePreview();
+        updateUndoRedoButtons();
+        clickSound.play();
+      }
+    }
+
+    function updateUndoRedoButtons() {
+      const undoBtn = document.querySelector('button[onclick="undo"]');
+      const redoBtn = document.querySelector('button[onclick="redo"]');
+      if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+      if (redoBtn) redoBtn.disabled = historyIndex >= history.length - 1;
+    }
+
+    function toggleDragMode() {
+      dragMode = !dragMode;
+      document.getElementById('drag-mode-text').textContent = `Drag to Paint: ${dragMode ? 'ON' : 'OFF'}`;
+      clickSound.play();
+    }
+
+    function clearGrid() {
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 12; c++) {
+          gridData[r][c] = 16; // White after offset
+        }
+      }
+      renderGrid();
+      renderInGamePreview();
+      saveState();
+      clickSound.play();
+    }
+
+    function fillEntireGrid() {
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 12; c++) {
+          gridData[r][c] = selectedColor;
+        }
+      }
+      renderGrid();
+      renderInGamePreview();
+      saveState();
+      clickSound.play();
     }
 
     function generateLuaTable() {
       const lua = gridData.map(row => `  {${row.join(',')}}`).join(',\n');
-      luaOutput.textContent = `{
-${lua}
-}`;
+      luaOutput.textContent = `{\n${lua}\n}`;
       discordNote.style.display = 'block';
+      clickSound.play();
     }
 
     function copyLuaTable() {
-      navigator.clipboard.writeText(luaOutput.textContent).then(() => {
-        alert("Copied to clipboard!");
-      });
+      const text = luaOutput.textContent;
+      if (!text) {
+        showError('No Lua table to copy!');
+        return;
+      }
+      navigator.clipboard.writeText(text)
+        .then(() => showError('Lua table copied to clipboard!', false))
+        .catch(() => showError('Failed to copy.'));
+      clickSound.play();
     }
 
-    function fillEntireGrid() {
-      for (let r = 0; r < 5; r++)
-        for (let c = 0; c < 12; c++)
-          gridData[r][c] = selectedColor;
-      renderGrid();
-      renderInGamePreview();
+    function loadLuaFile() {
+      const file = document.getElementById('lua-file').files[0];
+      if (!file) return;
+      loadingSpinner.style.display = 'block';
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const content = e.target.result;
+          const matches = [...content.matchAll(/(\d+)/g)].map(m => parseInt(m[1]));
+          if (matches.length === 5 * 12) {
+            matches.forEach((index, i) => {
+              const r = Math.floor(i / 12);
+              const c = i % 12;
+              if (index >= 0 && index <= 16) { // Allow 0–16 for Lua indices
+                gridData[r][c] = index;
+              } else {
+                throw new Error('Invalid color index');
+              }
+            });
+            renderGrid();
+            renderInGamePreview();
+            saveState();
+            loadingSpinner.style.display = 'none';
+          } else {
+            loadingSpinner.style.display = 'none';
+            showError('Invalid Lua file format or wrong grid size.');
+          }
+        } catch (err) {
+          loadingSpinner.style.display = 'none';
+          showError('Error reading file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+      clickSound.play();
+    }
+
+    function showError(message, isError = true) {
+      errorPopup.textContent = message;
+      errorPopup.style.background = isError ? 'rgba(50, 50, 50, 0.9)' : 'rgba(43, 43, 43, 0.9)';
+      errorPopup.style.display = 'block';
+      setTimeout(() => {
+        errorPopup.style.display = 'none';
+      }, 3000);
     }
 
     function saveAsPNG() {
       for (let r = 0; r < 5; r++) {
         for (let repeat = 0; repeat < 2; repeat++) {
           for (let c = 0; c < 12; c++) {
-            ctx.fillStyle = paletteColors[gridData[r][c]];
+            const colorIndex = getColorIndex(gridData[r][c]);
+            console.log(`PNG [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
+            ctx.fillStyle = paletteColors[colorIndex];
             ctx.fillRect(c * 30, (r * 2 + repeat) * 30, 30, 30);
           }
         }
@@ -268,11 +716,30 @@ ${lua}
       link.download = 'flag.png';
       link.href = canvas.toDataURL();
       link.click();
+      clickSound.play();
     }
 
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        undo();
+      }
+      if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        redo();
+      }
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAsPNG();
+      }
+    });
+
+    // Initialize
     renderGrid();
     renderInGamePreview();
-    selectedColorBox.style.background = paletteColors[selectedColor];
+    selectedColorBox.style.background = paletteColors[0]; // paletteColors[0] for Lua index 1
+    saveState();
   </script>
 </body>
 </html>
