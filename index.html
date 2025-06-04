@@ -65,14 +65,6 @@
       transform: scale(1.05);
     }
 
-    .container {
-      display: flex;
-      gap: 40px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
     .panel {
       background: rgba(43, 43, 43, 0.9);
       padding: 20px;
@@ -81,6 +73,8 @@
       border: 1px solid #444444;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       z-index: 1;
+      width: 100%;
+      max-width: 900px;
     }
 
     .panel:hover {
@@ -92,6 +86,35 @@
       margin-top: 0;
       font-size: 1.5em;
       color: #E0E0E0;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lua-section {
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lua-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 10px;
     }
 
     .palette {
@@ -277,65 +300,6 @@
       opacity: 1;
     }
 
-    .file-input-wrapper {
-      position: relative;
-      display: inline-block;
-      margin: 5px;
-    }
-
-    .file-input-wrapper input[type="file"] {
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      cursor: pointer;
-    }
-
-    .file-input-wrapper .file-input-label {
-      background: linear-gradient(45deg, #1A1A1A, #3A3A3A);
-      color: #FFFFFF;
-      font-weight: 700;
-      padding: 10px 20px;
-      border: 2px solid #FFFFFF;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      position: relative;
-    }
-
-    .file-input-wrapper .file-input-label:hover {
-      background: linear-gradient(45deg, #3A3A3A, #555555);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-    }
-
-    .file-input-wrapper .file-input-label::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1A1A1A;
-      color: #FFFFFF;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      z-index: 10;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-
-    .file-input-wrapper .file-input-label:hover::after {
-      opacity: 1;
-    }
-
     .discord-note {
       font-size: 0.9em;
       color: #BBBBBB;
@@ -395,7 +359,7 @@
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        gap: 20px;
+        gap: 40px;
       }
       .palette {
         grid-template-columns: repeat(4, 30px);
@@ -403,7 +367,7 @@
       h1 {
         font-size: 2em;
       }
-      button, .file-input-wrapper .file-input-label {
+      button {
         padding: 8px 15px;
       }
     }
@@ -434,6 +398,12 @@
   <div id="loading-spinner"></div>
   <h1>RATS Network - Clan Flag Editor</h1>
 
+  <!-- Background Music -->
+  <audio id="background-music" loop autoplay>
+    <source src="background-music.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="selected-preview">
     <strong>Selected Color:</strong> <div class="preview-box" id="selected-color"></div>
   </div>
@@ -450,31 +420,34 @@
     <button onclick="toggleRats()" data-tooltip="Toggle Rat Animation Intensity">
       <span>🐀</span> <span id="rats-text">Rats: High</span>
     </button>
-  </div>
-
-  <div class="container">
-    <div class="panel">
-      <h2>Flag Grid</h2>
-      <div class="grid" id="flag-grid"></div>
-    </div>
-    <div class="panel">
-      <h2>In-Game Preview</h2>
-      <div class="preview-grid" id="in-game-preview"></div>
-      <button onclick="saveAsPNG()" data-tooltip="Save Flag as PNG (Ctrl+S)"><span>💾</span> Save as PNG</button>
-    </div>
+    <button onclick="toggleMusic()" data-tooltip="Toggle Background Music">
+      <span id="music-icon">🔊</span> <span id="music-text">Music: ON</span>
+    </button>
   </div>
 
   <div class="panel">
-    <h2>Lua Output</h2>
-    <button onclick="generateLuaTable()" data-tooltip="Generate Lua Table for Submission"><span>📜</span> Generate Lua Table</button>
-    <button onclick="copyLuaTable()" data-tooltip="Copy Lua Table to Clipboard"><span>📋</span> Copy</button>
-    <div class="file-input-wrapper">
-      <input type="file" id="lua-file" accept=".lua" onchange="loadLuaFile()">
-      <label for="lua-file" class="file-input-label" data-tooltip="Load Lua Table from File"><span>📤</span> Load Lua File</label>
-    </div>
-    <div class="output" id="lua-output"></div>
-    <div class="discord-note" id="discord-note" style="display: none">
-      Please copy and send the above Lua table to <strong>@karl_sr</strong> on Discord and we will get your flag added as soon as possible!
+    <div class="container">
+      <div class="section">
+        <h2>Flag Grid</h2>
+        <div class="grid" id="flag-grid"></div>
+      </div>
+      <div class="section">
+        <h2>In-Game Preview</h2>
+        <div class="preview-grid" id="in-game-preview"></div>
+        <button onclick="saveAsPNG()" data-tooltip="Save Flag as PNG (Ctrl+S)"><span>💾</span> Save as PNG</button>
+      </div>
+      <div class="lua-section">
+        <h2>Lua Output</h2>
+        <div class="lua-buttons">
+          <button onclick="generateLuaTable()" data-tooltip="Generate Lua Table for Submission"><span>📜</span> Generate Lua Table</button>
+          <button onclick="copyLuaTable()" data-tooltip="Copy Lua Table to Clipboard"><span>📋</span> Copy</button>
+          <button onclick="pasteLuaTable()" data-tooltip="Paste Lua Table from Clipboard"><span>📝</span> Paste Lua File</button>
+        </div>
+        <div class="output" id="lua-output"></div>
+        <div class="discord-note" id="discord-note" style="display: none">
+          Please copy and send the above Lua table to <strong>@karl_sr</strong> on Discord and we will get your flag added as soon as possible!
+        </div>
+      </div>
     </div>
   </div>
 
@@ -522,6 +495,38 @@
     const ratContainer = document.getElementById('rat-container');
     let rats = [];
     let selectedColorIndex = 0;
+
+    // Background Music Setup
+    const backgroundMusic = document.getElementById("background-music");
+    let isMusicPlaying = true;
+
+    // Set initial volume to 20%
+    backgroundMusic.volume = 0.2;
+
+    // Function to toggle music
+    function toggleMusic() {
+      isMusicPlaying = !isMusicPlaying;
+      if (isMusicPlaying) {
+        backgroundMusic.play().catch(err => {
+          console.log("Autoplay failed:", err.message);
+          showError("Music playback requires user interaction. Click again to play.", false);
+        });
+        document.getElementById('music-icon').textContent = "🔊";
+        document.getElementById('music-text').textContent = "Music: ON";
+      } else {
+        backgroundMusic.pause();
+        document.getElementById('music-icon').textContent = "🔇";
+        document.getElementById('music-text').textContent = "Music: OFF";
+      }
+      clickSound.play();
+    }
+
+    // Ensure music plays after user interaction if autoplay fails
+    document.body.addEventListener('click', () => {
+      if (isMusicPlaying && backgroundMusic.paused) {
+        backgroundMusic.play().catch(err => console.log("Music play failed:", err.message));
+      }
+    }, { once: true });
 
     // Helper function to map Lua indices to paletteColors
     function getColorIndex(luaIndex) {
@@ -886,40 +891,53 @@
       clickSound.play();
     }
 
-    function loadLuaFile() {
-      const file = document.getElementById('lua-file').files[0];
-      if (!file) return;
+    async function pasteLuaTable() {
       loadingSpinner.style.display = 'block';
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const content = e.target.result;
-          const matches = [...content.matchAll(/(\d+)/g)].map(m => parseInt(m[1]));
-          if (matches.length === 5 * 12) {
-            matches.forEach((index, i) => {
-              const r = Math.floor(i / 12);
-              const c = i % 12;
-              if (index >= 0 && index <= 16) {
-                gridData[r][c] = index;
-              } else {
-                throw new Error('Invalid color index');
-              }
-            });
-            renderGrid();
-            renderInGamePreview();
-            saveState();
-            loadingSpinner.style.display = 'none';
-            showError('Lua file loaded successfully!', false);
-          } else {
-            loadingSpinner.style.display = 'none';
-            showError('Invalid Lua file format or wrong grid size.');
+      let content;
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          content = await navigator.clipboard.readText();
+          if (!content) {
+            throw new Error('Clipboard is empty.');
           }
-        } catch (err) {
-          loadingSpinner.style.display = 'none';
-          showError('Error reading file: ' + err.message);
+        } else {
+          throw new Error('Clipboard API not supported.');
         }
-      };
-      reader.readAsText(file);
+      } catch (err) {
+        console.log('Clipboard access failed:', err.message);
+        content = prompt("Clipboard access failed. Please paste your Lua table here:", "");
+        if (!content) {
+          loadingSpinner.style.display = 'none';
+          showError('No Lua table pasted.');
+          return;
+        }
+      }
+
+      try {
+        const matches = [...content.matchAll(/(\d+)/g)].map(m => parseInt(m[1]));
+        if (matches.length === 5 * 12) {
+          matches.forEach((index, i) => {
+            const r = Math.floor(i / 12);
+            const c = i % 12;
+            if (index >= 0 && index <= 16) {
+              gridData[r][c] = index;
+            } else {
+              throw new Error('Invalid color index');
+            }
+          });
+          renderGrid();
+          renderInGamePreview();
+          saveState();
+          loadingSpinner.style.display = 'none';
+          showError('Lua table loaded from clipboard!', false);
+        } else {
+          loadingSpinner.style.display = 'none';
+          showError('Invalid Lua table format or wrong grid size.');
+        }
+      } catch (err) {
+        loadingSpinner.style.display = 'none';
+        showError('Error parsing Lua table: ' + err.message);
+      }
       clickSound.play();
     }
 
