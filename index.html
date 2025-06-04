@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RATS Network - Clan Flag Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Rockwell';
+      src: local('Rockwell'), local('Rockwell Regular');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      margin: 0;
+      background: #1e1e1e;
+      color: #eee;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #ff55ff;
+      font-size: 2em;
+      margin-bottom: 10px;
+      font-family: 'Rockwell', 'Poppins', serif;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .panel {
+      background: #2b2b2b;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255, 85, 255, 0.2);
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(8, 30px);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .color {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      border: 2px solid #444;
+      box-sizing: border-box;
+    }
+
+    .selected-preview {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .preview-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 30px);
+      grid-template-rows: repeat(5, 30px);
+      gap: 4px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 30px);
+      grid-template-rows: repeat(10, 30px);
+    }
+
+    .cell {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #555;
+      cursor: pointer;
+    }
+
+    .preview-cell {
+      width: 30px;
+      height: 30px;
+      border: none;
+    }
+
+    .output {
+      background: #121212;
+      padding: 10px;
+      border-radius: 8px;
+      white-space: pre;
+      margin-top: 20px;
+      max-width: 100%;
+      overflow-x: auto;
+      font-family: 'Rockwell', monospace;
+    }
+
+    button {
+      background: #ff55ff;
+      color: black;
+      font-weight: bold;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .discord-note {
+      font-size: 0.9em;
+      color: #bbb;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>RATS Network - Clan Flag Editor</h1>
+  <div class="selected-preview">
+    Selected Color: <div class="preview-box" id="selected-color"></div>
+  </div>
+  <div class="palette" id="palette"></div>
+  <button onclick="fillEntireGrid()">Fill Grid with Selected Color</button>
+
+  <div class="container">
+    <div class="panel">
+      <h2>Flag Grid</h2>
+      <div class="grid" id="flag-grid"></div>
+    </div>
+    <div class="panel">
+      <h2>In-Game Preview</h2>
+      <div class="preview-grid" id="in-game-preview"></div>
+      <button onclick="saveAsPNG()">Save as PNG</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <button onclick="generateLuaTable()">Generate Lua Table</button>
+    <button onclick="copyLuaTable()">Copy to Clipboard</button>
+    <div class="output" id="lua-output"></div>
+    <div class="discord-note" id="discord-note" style="display: none">
+      Please copy and send the above Lua table to <strong>@karl_sr</strong> on Discord and we will get your flag added as soon as possible!
+    </div>
+  </div>
+
+  <canvas id="flag-canvas" width="360" height="300" style="display:none;"></canvas>
+
+  <script>
+    const paletteColors = [
+      "#000000", "#0000AA", "#00AA00", "#00AAAA",
+      "#AA0000", "#AA00AA", "#AA5500", "#AAAAAA",
+      "#555555", "#5555FF", "#55FF55", "#55FFFF",
+      "#FF5555", "#FF55FF", "#FFFF55", "#FFFFFF"
+    ];
+    const gridData = Array.from({ length: 5 }, () => Array(12).fill(13));
+    let selectedColor = 0;
+    let isPainting = false;
+
+    const palette = document.getElementById("palette");
+    const selectedColorBox = document.getElementById("selected-color");
+    const flagGrid = document.getElementById("flag-grid");
+    const inGamePreview = document.getElementById("in-game-preview");
+    const luaOutput = document.getElementById("lua-output");
+    const discordNote = document.getElementById("discord-note");
+    const canvas = document.getElementById("flag-canvas");
+    const ctx = canvas.getContext("2d");
+
+    paletteColors.forEach((color, i) => {
+      const swatch = document.createElement("div");
+      swatch.className = "color";
+      swatch.style.background = color;
+      swatch.onclick = () => {
+        selectedColor = i;
+        selectedColorBox.style.background = color;
+      };
+      palette.appendChild(swatch);
+    });
+
+    function renderGrid() {
+      flagGrid.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 12; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.style.background = paletteColors[gridData[r][c]];
+          cell.onmousedown = () => {
+            isPainting = true;
+            gridData[r][c] = selectedColor;
+            cell.style.background = paletteColors[selectedColor];
+            renderInGamePreview();
+          };
+          cell.onmouseover = () => {
+            if (isPainting) {
+              gridData[r][c] = selectedColor;
+              cell.style.background = paletteColors[selectedColor];
+              renderInGamePreview();
+            }
+          };
+          cell.onmouseup = () => isPainting = false;
+          flagGrid.appendChild(cell);
+        }
+      }
+      document.body.onmouseup = () => isPainting = false;
+    }
+
+    function renderInGamePreview() {
+      inGamePreview.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        for (let repeat = 0; repeat < 2; repeat++) {
+          for (let c = 0; c < 12; c++) {
+            const cell = document.createElement("div");
+            cell.className = "preview-cell";
+            cell.style.background = paletteColors[gridData[r][c]];
+            inGamePreview.appendChild(cell);
+          }
+        }
+      }
+    }
+
+    function generateLuaTable() {
+      const lua = gridData.map(row => `  {${row.join(',')}}`).join(',\n');
+      luaOutput.textContent = `{
+${lua}
+}`;
+      discordNote.style.display = 'block';
+    }
+
+    function copyLuaTable() {
+      navigator.clipboard.writeText(luaOutput.textContent).then(() => {
+        alert("Copied to clipboard!");
+      });
+    }
+
+    function fillEntireGrid() {
+      for (let r = 0; r < 5; r++)
+        for (let c = 0; c < 12; c++)
+          gridData[r][c] = selectedColor;
+      renderGrid();
+      renderInGamePreview();
+    }
+
+    function saveAsPNG() {
+      for (let r = 0; r < 5; r++) {
+        for (let repeat = 0; repeat < 2; repeat++) {
+          for (let c = 0; c < 12; c++) {
+            ctx.fillStyle = paletteColors[gridData[r][c]];
+            ctx.fillRect(c * 30, (r * 2 + repeat) * 30, 30, 30);
+          }
+        }
+      }
+      const link = document.createElement('a');
+      link.download = 'flag.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    renderGrid();
+    renderInGamePreview();
+    selectedColorBox.style.background = paletteColors[selectedColor];
+  </script>
+</body>
+</html>
