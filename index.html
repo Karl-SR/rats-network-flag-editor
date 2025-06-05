@@ -399,7 +399,7 @@
   <h1>RATS Network - Clan Flag Editor</h1>
 
   <!-- Background Music -->
-  <audio id="background-music" loop autoplay>
+  <audio id="background-music" loop>
     <source src="background-music.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
@@ -423,6 +423,8 @@
     <button onclick="toggleMusic()" data-tooltip="Toggle Background Music">
       <span id="music-icon">🔊</span> <span id="music-text">Music: ON</span>
     </button>
+    <!-- Fallback Play Button -->
+    <button onclick="playMusicFallback()" data-tooltip="Manually Start Background Music"><span>🎵</span> Play Music</button>
   </div>
 
   <div class="panel">
@@ -499,34 +501,62 @@
     // Background Music Setup
     const backgroundMusic = document.getElementById("background-music");
     let isMusicPlaying = true;
+    let hasInteracted = false;
+
+    // Log audio element and source
+    console.log("Background Music Element:", backgroundMusic);
+    console.log("Audio Source URL:", backgroundMusic.src);
 
     // Set initial volume to 20%
-    backgroundMusic.volume = 1;
+    backgroundMusic.volume = 0.2;
+    console.log("Initial Volume Set to:", backgroundMusic.volume);
+
+    // Function to attempt playing music
+    function attemptPlayMusic() {
+      backgroundMusic.play()
+        .then(() => {
+          console.log("Background music started playing successfully.");
+          showError("Music started!", false);
+        })
+        .catch(err => {
+          console.error("Failed to play background music:", err.message);
+          showError("Music failed to play: " + err.message + ". Click 'Play Music' to try again.");
+        });
+    }
 
     // Function to toggle music
     function toggleMusic() {
       isMusicPlaying = !isMusicPlaying;
       if (isMusicPlaying) {
-        backgroundMusic.play().catch(err => {
-          console.log("Autoplay failed:", err.message);
-          showError("Music playback requires user interaction. Click again to play.", false);
-        });
+        attemptPlayMusic();
         document.getElementById('music-icon').textContent = "🔊";
         document.getElementById('music-text').textContent = "Music: ON";
       } else {
         backgroundMusic.pause();
+        console.log("Background music paused.");
         document.getElementById('music-icon').textContent = "🔇";
         document.getElementById('music-text').textContent = "Music: OFF";
+        showError("Music paused.", false);
       }
       clickSound.play();
     }
 
-    // Ensure music plays after user interaction if autoplay fails
-    document.body.addEventListener('click', () => {
+    // Fallback function for manual play
+    function playMusicFallback() {
+      hasInteracted = true;
       if (isMusicPlaying && backgroundMusic.paused) {
-        backgroundMusic.play().catch(err => console.log("Music play failed:", err.message));
+        attemptPlayMusic();
       }
-    }, { once: true });
+      clickSound.play();
+    }
+
+    // Listen for user interaction
+    document.addEventListener('click', () => {
+      if (!hasInteracted && isMusicPlaying && backgroundMusic.paused) {
+        hasInteracted = true;
+        attemptPlayMusic();
+      }
+    });
 
     // Helper function to map Lua indices to paletteColors
     function getColorIndex(luaIndex) {
