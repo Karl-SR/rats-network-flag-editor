@@ -356,33 +356,6 @@
       z-index: 3;
     }
 
-    /* Start Prompt Overlay */
-    #start-prompt {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1001;
-      animation: fadeIn 0.5s ease-in;
-    }
-
-    #start-prompt button {
-      font-size: 1.2em;
-      padding: 15px 30px;
-      background: linear-gradient(45deg, #FF5555, #FF3F3F);
-      border: 2px solid #FFFFFF;
-      box-shadow: 0 0 20px rgba(255, 85, 85, 0.8);
-    }
-
-    #start-prompt button:hover {
-      background: linear-gradient(45deg, #FF3F3F, #FF5555);
-    }
-
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -424,15 +397,10 @@
   <div id="error-popup"></div>
   <div id="loading-spinner"></div>
 
-  <!-- Start Prompt Overlay -->
-  <div id="start-prompt">
-    <button onclick="startExperience()">Click to Start Experience 🐀</button>
-  </div>
-
   <h1>RATS Network - Clan Flag Editor</h1>
 
   <!-- Background Music -->
-  <audio id="background-music" loop muted>
+  <audio id="background-music" loop>
     <source src="background-music.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
@@ -533,55 +501,23 @@
     // Background Music Setup
     const backgroundMusic = document.getElementById("background-music");
     let isMusicPlaying = true;
-    let hasInteracted = false;
+    let hasMusicStarted = false; // Track if music has started
 
     // Log audio element and source
     console.log("Background Music Element:", backgroundMusic);
     console.log("Audio Source URL:", backgroundMusic.src);
 
-    // Set initial volume to 20% but start muted
-    backgroundMusic.volume = 0;
+    // Set initial volume to 20%
+    backgroundMusic.volume = 0.2;
     console.log("Initial Volume Set to:", backgroundMusic.volume);
-
-    // Attempt muted autoplay on page load
-    window.addEventListener('load', () => {
-      backgroundMusic.play()
-        .then(() => {
-          console.log("Muted autoplay started successfully.");
-          // Gradually unmute after 1 second
-          setTimeout(() => {
-            backgroundMusic.volume = 0.2;
-            console.log("Unmuted music, volume set to:", backgroundMusic.volume);
-            showError("Music started!", false);
-          }, 1000);
-        })
-        .catch(err => {
-          console.error("Muted autoplay failed:", err.message);
-          showError("Music requires interaction. Click 'Start Experience' to begin.", false);
-        });
-    });
-
-    // Function to start the experience
-    function startExperience() {
-      hasInteracted = true;
-      document.getElementById('start-prompt').style.display = 'none';
-      if (isMusicPlaying && backgroundMusic.paused) {
-        attemptPlayMusic();
-      } else if (backgroundMusic.volume === 0) {
-        // If muted autoplay succeeded, unmute immediately
-        backgroundMusic.volume = 0.2;
-        console.log("Unmuted music after interaction, volume set to:", backgroundMusic.volume);
-        showError("Music started!", false);
-      }
-    }
 
     // Function to attempt playing music
     function attemptPlayMusic() {
-      backgroundMusic.muted = false;
-      backgroundMusic.volume = 0.2;
+      if (hasMusicStarted) return; // Only play if it hasn't started yet
       backgroundMusic.play()
         .then(() => {
           console.log("Background music started playing successfully.");
+          hasMusicStarted = true;
           showError("Music started!", false);
         })
         .catch(err => {
@@ -594,9 +530,18 @@
     function toggleMusic() {
       isMusicPlaying = !isMusicPlaying;
       if (isMusicPlaying) {
-        attemptPlayMusic();
-        document.getElementById('music-icon').textContent = "🔊";
-        document.getElementById('music-text').textContent = "Music: ON";
+        backgroundMusic.play()
+          .then(() => {
+            console.log("Background music started playing successfully.");
+            hasMusicStarted = true;
+            document.getElementById('music-icon').textContent = "🔊";
+            document.getElementById('music-text').textContent = "Music: ON";
+            showError("Music started!", false);
+          })
+          .catch(err => {
+            console.error("Failed to play background music:", err.message);
+            showError("Music failed to play: " + err.message + ". Click 'Play Music' to try again.");
+          });
       } else {
         backgroundMusic.pause();
         console.log("Background music paused.");
@@ -609,9 +554,19 @@
 
     // Fallback function for manual play
     function playMusicFallback() {
-      hasInteracted = true;
-      if (isMusicPlaying && backgroundMusic.paused) {
-        attemptPlayMusic();
+      if (isMusicPlaying) {
+        backgroundMusic.play()
+          .then(() => {
+            console.log("Background music started playing successfully (manual).");
+            hasMusicStarted = true;
+            document.getElementById('music-icon').textContent = "🔊";
+            document.getElementById('music-text').textContent = "Music: ON";
+            showError("Music started!", false);
+          })
+          .catch(err => {
+            console.error("Failed to play background music (manual):", err.message);
+            showError("Music failed to play: " + err.message);
+          });
       }
       clickSound.play();
     }
@@ -789,6 +744,8 @@
             gridData[r][c] = selectedColor;
             cell.style.background = paletteColors[getColorIndex(selectedColor)];
             cell.classList.add('painted');
+            // Start music on first paint
+            if (isMusicPlaying) attemptPlayMusic();
             saveState();
             renderInGamePreview();
             clickSound.play();
@@ -799,6 +756,8 @@
             gridData[r][c] = selectedColor;
             cell.style.background = paletteColors[getColorIndex(selectedColor)];
             cell.classList.add('painted');
+            // Start music on first paint
+            if (isMusicPlaying) attemptPlayMusic();
             saveState();
             renderInGamePreview();
             clickSound.play();
@@ -808,6 +767,8 @@
               gridData[r][c] = selectedColor;
               cell.style.background = paletteColors[getColorIndex(selectedColor)];
               cell.classList.add('painted');
+              // Start music on first paint (if dragging)
+              if (isMusicPlaying) attemptPlayMusic();
               saveState();
               renderInGamePreview();
               clickSound.play();
@@ -826,6 +787,8 @@
                   gridData[tr][tc] = selectedColor;
                   target.style.background = paletteColors[getColorIndex(selectedColor)];
                   target.classList.add('painted');
+                  // Start music on first paint (if dragging)
+                  if (isMusicPlaying) attemptPlayMusic();
                   saveState();
                   renderInGamePreview();
                   clickSound.play();
@@ -840,6 +803,8 @@
               gridData[r][c] = selectedColor;
               cell.style.background = paletteColors[getColorIndex(selectedColor)];
               cell.classList.add('painted');
+              // Start music on first paint
+              if (isMusicPlaying) attemptPlayMusic();
               saveState();
               renderInGamePreview();
               clickSound.play();
