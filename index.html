@@ -421,10 +421,9 @@
     <button onclick="toggleRats()" data-tooltip="Toggle Rat Animation Intensity">
       <span>🐀</span> <span id="rats-text">Rats: High</span>
     </button>
-    <button onclick="toggleMusic()" data-tooltip="Toggle Background Music">
+    <button id="music-toggle-button" onclick="toggleMusic()" data-tooltip="Toggle Background Music" style="display: none;">
       <span id="music-icon">🔊</span> <span id="music-text">Music: ON</span>
     </button>
-    <button onclick="playMusicFallback()" data-tooltip="Manually Start Background Music"><span>🎵</span> Play Music</button>
   </div>
 
   <div class="panel">
@@ -500,8 +499,9 @@
 
     // Background Music Setup
     const backgroundMusic = document.getElementById("background-music");
+    const musicToggleButton = document.getElementById("music-toggle-button");
     let isMusicPlaying = true;
-    let hasMusicStarted = false; // Track if music has started
+    let hasMusicStarted = false;
 
     // Log audio element and source
     console.log("Background Music Element:", backgroundMusic);
@@ -513,16 +513,18 @@
 
     // Function to attempt playing music
     function attemptPlayMusic() {
-      if (hasMusicStarted) return; // Only play if it hasn't started yet
+      if (hasMusicStarted) return;
       backgroundMusic.play()
         .then(() => {
           console.log("Background music started playing successfully.");
           hasMusicStarted = true;
-          showError("Music started!", false);
+          // Show the music toggle button
+          musicToggleButton.style.display = 'inline-flex';
         })
         .catch(err => {
           console.error("Failed to play background music:", err.message);
-          showError("Music failed to play: " + err.message + ". Click 'Play Music' to try again.");
+          // Optionally show an error, but let's keep the UI clean as requested
+          console.log("Music playback failed. User can toggle music manually if needed.");
         });
     }
 
@@ -536,37 +538,15 @@
             hasMusicStarted = true;
             document.getElementById('music-icon').textContent = "🔊";
             document.getElementById('music-text').textContent = "Music: ON";
-            showError("Music started!", false);
           })
           .catch(err => {
             console.error("Failed to play background music:", err.message);
-            showError("Music failed to play: " + err.message + ". Click 'Play Music' to try again.");
           });
       } else {
         backgroundMusic.pause();
         console.log("Background music paused.");
         document.getElementById('music-icon').textContent = "🔇";
         document.getElementById('music-text').textContent = "Music: OFF";
-        showError("Music paused.", false);
-      }
-      clickSound.play();
-    }
-
-    // Fallback function for manual play
-    function playMusicFallback() {
-      if (isMusicPlaying) {
-        backgroundMusic.play()
-          .then(() => {
-            console.log("Background music started playing successfully (manual).");
-            hasMusicStarted = true;
-            document.getElementById('music-icon').textContent = "🔊";
-            document.getElementById('music-text').textContent = "Music: ON";
-            showError("Music started!", false);
-          })
-          .catch(err => {
-            console.error("Failed to play background music (manual):", err.message);
-            showError("Music failed to play: " + err.message);
-          });
       }
       clickSound.play();
     }
@@ -744,7 +724,6 @@
             gridData[r][c] = selectedColor;
             cell.style.background = paletteColors[getColorIndex(selectedColor)];
             cell.classList.add('painted');
-            // Start music on first paint
             if (isMusicPlaying) attemptPlayMusic();
             saveState();
             renderInGamePreview();
@@ -756,7 +735,6 @@
             gridData[r][c] = selectedColor;
             cell.style.background = paletteColors[getColorIndex(selectedColor)];
             cell.classList.add('painted');
-            // Start music on first paint
             if (isMusicPlaying) attemptPlayMusic();
             saveState();
             renderInGamePreview();
@@ -767,7 +745,6 @@
               gridData[r][c] = selectedColor;
               cell.style.background = paletteColors[getColorIndex(selectedColor)];
               cell.classList.add('painted');
-              // Start music on first paint (if dragging)
               if (isMusicPlaying) attemptPlayMusic();
               saveState();
               renderInGamePreview();
@@ -787,7 +764,6 @@
                   gridData[tr][tc] = selectedColor;
                   target.style.background = paletteColors[getColorIndex(selectedColor)];
                   target.classList.add('painted');
-                  // Start music on first paint (if dragging)
                   if (isMusicPlaying) attemptPlayMusic();
                   saveState();
                   renderInGamePreview();
@@ -803,7 +779,6 @@
               gridData[r][c] = selectedColor;
               cell.style.background = paletteColors[getColorIndex(selectedColor)];
               cell.classList.add('painted');
-              // Start music on first paint
               if (isMusicPlaying) attemptPlayMusic();
               saveState();
               renderInGamePreview();
