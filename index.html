@@ -356,6 +356,33 @@
       z-index: 3;
     }
 
+    /* Start Prompt Overlay */
+    #start-prompt {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    #start-prompt button {
+      font-size: 1.2em;
+      padding: 15px 30px;
+      background: linear-gradient(45deg, #FF5555, #FF3F3F);
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 0 20px rgba(255, 85, 85, 0.8);
+    }
+
+    #start-prompt button:hover {
+      background: linear-gradient(45deg, #FF3F3F, #FF5555);
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -396,10 +423,16 @@
   <div id="rat-container"></div>
   <div id="error-popup"></div>
   <div id="loading-spinner"></div>
+
+  <!-- Start Prompt Overlay -->
+  <div id="start-prompt">
+    <button onclick="startExperience()">Click to Start Experience 🐀</button>
+  </div>
+
   <h1>RATS Network - Clan Flag Editor</h1>
 
   <!-- Background Music -->
-  <audio id="background-music" loop>
+  <audio id="background-music" loop muted>
     <source src="background-music.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
@@ -423,7 +456,6 @@
     <button onclick="toggleMusic()" data-tooltip="Toggle Background Music">
       <span id="music-icon">🔊</span> <span id="music-text">Music: ON</span>
     </button>
-    <!-- Fallback Play Button -->
     <button onclick="playMusicFallback()" data-tooltip="Manually Start Background Music"><span>🎵</span> Play Music</button>
   </div>
 
@@ -507,12 +539,46 @@
     console.log("Background Music Element:", backgroundMusic);
     console.log("Audio Source URL:", backgroundMusic.src);
 
-    // Set initial volume to 20%
-    backgroundMusic.volume = 0.2;
+    // Set initial volume to 20% but start muted
+    backgroundMusic.volume = 0;
     console.log("Initial Volume Set to:", backgroundMusic.volume);
+
+    // Attempt muted autoplay on page load
+    window.addEventListener('load', () => {
+      backgroundMusic.play()
+        .then(() => {
+          console.log("Muted autoplay started successfully.");
+          // Gradually unmute after 1 second
+          setTimeout(() => {
+            backgroundMusic.volume = 0.2;
+            console.log("Unmuted music, volume set to:", backgroundMusic.volume);
+            showError("Music started!", false);
+          }, 1000);
+        })
+        .catch(err => {
+          console.error("Muted autoplay failed:", err.message);
+          showError("Music requires interaction. Click 'Start Experience' to begin.", false);
+        });
+    });
+
+    // Function to start the experience
+    function startExperience() {
+      hasInteracted = true;
+      document.getElementById('start-prompt').style.display = 'none';
+      if (isMusicPlaying && backgroundMusic.paused) {
+        attemptPlayMusic();
+      } else if (backgroundMusic.volume === 0) {
+        // If muted autoplay succeeded, unmute immediately
+        backgroundMusic.volume = 0.2;
+        console.log("Unmuted music after interaction, volume set to:", backgroundMusic.volume);
+        showError("Music started!", false);
+      }
+    }
 
     // Function to attempt playing music
     function attemptPlayMusic() {
+      backgroundMusic.muted = false;
+      backgroundMusic.volume = 0.2;
       backgroundMusic.play()
         .then(() => {
           console.log("Background music started playing successfully.");
@@ -549,14 +615,6 @@
       }
       clickSound.play();
     }
-
-    // Listen for user interaction
-    document.addEventListener('click', () => {
-      if (!hasInteracted && isMusicPlaying && backgroundMusic.paused) {
-        hasInteracted = true;
-        attemptPlayMusic();
-      }
-    });
 
     // Helper function to map Lua indices to paletteColors
     function getColorIndex(luaIndex) {
