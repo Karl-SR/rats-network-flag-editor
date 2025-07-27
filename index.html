@@ -2,34 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>RATS Network - Clan Flag Editor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <title>RATS NET FLAG EDITOR</title>
   <style>
     @font-face {
-      font-family: 'Rockwell';
-      src: local('Rockwell'), local('Rockwell Regular');
+      font-family: 'OCR-A';
+      src: url('https://fonts.cdnfonts.com/s/14896/OCR-A.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
     }
-
     body {
       margin: 0;
-      background: #000000;
-      color: #FFFFFF;
-      font-family: 'Poppins', sans-serif;
+      background: #000000; /* Black CRT background */
+      color: #B0B0B0; /* Dimmer, flickering gray for ancient teletype */
+      font-family: 'OCR-A', 'Courier New', monospace; /* Blockiest font */
+      font-size: 14px; /* Super big and blocky */
+      line-height: 1.0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px;
+      padding: 5px;
       min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-      animation: fadeIn 1s ease-in;
+      text-align: left;
+      overflow: hidden;
+      animation: flicker 0.25s infinite alternate; /* Intense CRT flicker */
+      background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px); /* Heavy scanlines */
+      background-size: 100% 1.2px;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    @keyframes flicker {
+      0% { opacity: 0.8; }
+      100% { opacity: 1; }
+    }
+
+    #boot-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      color: #B0B0B0;
+      font-family: 'OCR-A', 'Courier New', monospace;
+      font-size: 14px;
+      padding: 12px;
+      white-space: pre;
+      display: none;
+      z-index: 1000;
+      border: 4px solid #404040; /* Ultra-thick, worn teletype bezel */
+      animation: phosphor 0.6s infinite alternate; /* Severe phosphor decay */
+    }
+
+    @keyframes phosphor {
+      0% { color: #B0B0B0; }
+      100% { color: #707070; }
+    }
+
+    #main-content {
+      display: none;
+      width: 100%;
+      max-width: 80ch; /* 80-character terminal width */
     }
 
     #rat-container {
@@ -39,292 +70,184 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
+      z-index: -1;
     }
 
     .rat {
       position: absolute;
-      font-size: 20px;
+      font-size: 14px;
       user-select: none;
-      transition: transform 0.1s linear, opacity 0.5s ease;
+      color: #B0B0B0;
     }
 
     h1 {
-      color: #FFFFFF;
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      font-family: 'Rockwell', 'Poppins', serif;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-      transition: transform 0.3s ease;
-      z-index: 3;
-    }
-
-    h1:hover {
-      transform: scale(1.05);
+      font-size: 16px; /* Bigger, blockier header */
+      font-weight: normal;
+      margin: 5px 0;
+      border-top: 3px solid #B0B0B0;
+      border-bottom: 3px solid #B0B0B0;
+      padding: 3px 0;
+      width: 100%;
+      text-align: center;
     }
 
     .panel {
-      background: rgba(43, 43, 43, 0.9);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-      border: 1px solid #444444;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      z-index: 1;
+      border: 3px solid #B0B0B0;
+      padding: 6px;
       width: 100%;
-      max-width: 900px;
-    }
-
-    .panel:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
 
     .panel h2 {
-      margin-top: 0;
-      font-size: 1.5em;
-      color: #E0E0E0;
+      font-size: 14px;
+      font-weight: normal;
+      border-bottom: 2px dashed #B0B0B0;
+      margin: 0 0 6px 0;
+      text-align: center;
     }
 
     .container {
       display: flex;
-      flex-wrap: wrap;
-      gap: 40px;
-      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .section {
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
 
     .lua-section {
       width: 100%;
-      max-width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .lua-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 10px;
     }
 
     .palette {
-      display: grid;
-      grid-template-columns: repeat(8, 30px);
-      gap: 8px;
-      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      border: 3px solid #B0B0B0;
+      padding: 6px;
+      width: 100%;
     }
 
     .color {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 20px;
+      border: 2px solid #B0B0B0;
+      text-align: center;
+      font-size: 14px;
+      line-height: 20px;
       cursor: pointer;
-      border: 2px solid #FFFFFF;
-      border-radius: 4px;
-      box-sizing: border-box;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-      position: relative;
-    }
-
-    .color:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
     }
 
     .color.selected {
-      border-color: #FF5555;
-      box-shadow: 0 0 12px rgba(255, 85, 85, 0.8);
-    }
-
-    .color:focus {
-      outline: none;
-      border-color: #FF5555;
-      box-shadow: 0 0 12px rgba(255, 85, 85, 0.8);
-    }
-
-    .color:hover::after {
-      content: attr(data-hex);
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1A1A1A;
-      color: #FFFFFF;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      z-index: 10;
+      background: #B0B0B0;
+      color: #000000;
     }
 
     .selected-preview {
-      margin: 20px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      color: #E0E0E0;
-      z-index: 3;
+      margin: 6px 0;
+      font-size: 14px;
     }
 
     .preview-box {
-      width: 20px;
-      height: 20px;
-      border: 2px solid #FFFFFF;
-      border-radius: 4px;
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #B0B0B0;
+      vertical-align: middle;
     }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(12, 30px);
-      grid-template-rows: repeat(5, 30px);
-      gap: 4px;
+      font-size: 14px;
+      line-height: 1;
+      border: 3px solid #B0B0B0;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
     .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(12, 30px);
-      grid-template-rows: repeat(10, 30px);
-      gap: 0;
-      z-index: 1;
+      font-size: 14px;
+      line-height: 1;
+      border: 3px solid #B0B0B0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
     }
 
-    .cell {
-      width: 30px;
-      height: 30px;
-      border: 1px solid #555;
-      cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    .grid-row {
+      display: flex;
+      gap: 2px;
     }
 
-    .cell.painted {
-      animation: paintFeedback 0.2s ease;
+    .preview-row {
+      display: flex;
+      gap: 0; /* Seamless preview */
     }
 
-    @keyframes paintFeedback {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-
-    .cell:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-    }
-
-    .preview-cell {
-      width: 30px;
-      height: 30px;
-      border: none;
+    .cell, .preview-cell {
+      width: 14px;
+      height: 14px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 14px;
     }
 
     .output {
-      background: #121212;
-      padding: 15px;
-      border-radius: 8px;
+      background: #000000;
+      border: 3px solid #B0B0B0;
+      padding: 6px;
       white-space: pre;
-      margin-top: 20px;
+      margin-top: 6px;
       max-width: 100%;
       overflow-x: auto;
-      font-family: 'Rockwell', monospace;
-      color: #E0E0E0;
-      border: 1px solid #444444;
+      font-size: 14px;
     }
 
     button {
-      background: linear-gradient(45deg, #1A1A1A, #3A3A3A);
-      color: #FFFFFF;
-      font-weight: 700;
-      padding: 10px 20px;
-      border: 2px solid #FFFFFF;
-      border-radius: 8px;
+      background: #000000;
+      color: #B0B0B0;
+      font-family: 'OCR-A', 'Courier New', monospace;
+      font-size: 14px;
+      padding: 3px 6px;
+      border: 2px solid #B0B0B0;
       cursor: pointer;
-      margin: 5px;
-      font-family: 'Poppins', sans-serif;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-      z-index: 3;
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      margin: 3px;
+      text-align: left;
     }
 
     button:hover {
-      background: linear-gradient(45deg, #3A3A3A, #555555);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-    }
-
-    button:focus {
-      outline: none;
-      box-shadow: 0 0 15px rgba(255, 85, 85, 0.8);
-      border-color: #FF5555;
+      background: #B0B0B0;
+      color: #000000;
     }
 
     button:active {
-      transform: scale(0.95);
+      background: #404040;
+      color: #000000;
     }
 
     button:disabled {
-      opacity: 0.5;
+      color: #404040;
       cursor: not-allowed;
     }
 
-    button::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1A1A1A;
-      color: #FFFFFF;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      z-index: 10;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-
-    button:hover::after {
-      opacity: 1;
-    }
-
     .discord-note {
-      font-size: 0.9em;
-      color: #BBBBBB;
-      margin-top: 15px;
-      font-style: italic;
-      z-index: 3;
+      font-size: 14px;
+      margin-top: 6px;
     }
 
     #error-popup {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(43, 43, 43, 0.9);
-      color: #FFFFFF;
-      padding: 15px 25px;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      top: 12px;
+      left: 12px;
+      background: #000000;
+      color: #B0B0B0;
+      padding: 6px;
+      border: 3px solid #B0B0B0;
       display: none;
-      z-index: 1000;
-      animation: slideIn 0.5s ease;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      font-size: 14px;
+      max-width: 80ch;
     }
 
     #loading-spinner {
@@ -333,13 +256,12 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      border: 5px solid #FFFFFF;
-      border-top: 5px solid #555555;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #B0B0B0;
+      border-top: 3px solid #000000;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
-      z-index: 1000;
+      animation: spin 1.2s linear infinite;
     }
 
     @keyframes spin {
@@ -350,103 +272,90 @@
     .button-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 10px 0;
-      z-index: 3;
+      gap: 6px;
+      margin: 6px 0;
     }
 
     @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        gap: 40px;
+      body, #boot-screen, .palette, .grid, .preview-grid, .output, button, h1, h2, .color, .cell, .preview-cell {
+        font-size: 12px;
       }
-      .palette {
-        grid-template-columns: repeat(4, 30px);
+      .color, .cell, .preview-cell {
+        width: 12px;
+        height: 12px;
+        line-height: 12px;
       }
-      h1 {
-        font-size: 2em;
+      .preview-box {
+        width: 12px;
+        height: 12px;
       }
-      button {
-        padding: 8px 15px;
-      }
+      h1 { font-size: 14px; }
     }
 
     @media (max-width: 480px) {
-      .palette {
-        grid-template-columns: repeat(2, 30px);
+      body, #boot-screen, .palette, .grid, .preview-grid, .output, button, h1, h2, .color, .cell, .preview-cell {
+        font-size: 10px;
       }
-      .grid {
-        grid-template-columns: repeat(12, calc((100vw - 60px) / 12));
-        grid-template-rows: repeat(5, calc((100vw - 60px) / 12));
+      .color, .cell, .preview-cell {
+        width: 10px;
+        height: 10px;
+        line-height: 10px;
       }
-      .preview-grid {
-        grid-template-columns: repeat(12, calc((100vw - 60px) / 12));
-        grid-template-rows: repeat(10, calc((100vw - 60px) / 12));
-        gap: 0;
+      .preview-box {
+        width: 10px;
+        height: 10px;
       }
-      .cell, .preview-cell {
-        width: calc((100vw - 60px) / 12);
-        height: calc((100vw - 60px) / 12);
-      }
+      h1 { font-size: 12px; }
     }
   </style>
 </head>
 <body>
-  <div id="rat-container"></div>
-  <div id="error-popup"></div>
-  <div id="loading-spinner"></div>
+  <div id="boot-screen"></div>
+  <div id="main-content">
+    <div id="rat-container"></div>
+    <div id="error-popup"></div>
+    <div id="loading-spinner"></div>
 
-  <h1>RATS Network - Clan Flag Editor</h1>
+    <h1>=== RATS NET FLAG EDITOR v0.1 ===</h1>
 
-  <!-- Background Music -->
-  <audio id="background-music" loop>
-    <source src="background-music.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
+    <div class="selected-preview">
+      COLOR: <div class="preview-box" id="selected-color"></div> <span id="selected-color-name"></span>
+    </div>
 
-  <div class="selected-preview">
-    <strong>Selected Color:</strong> <div class="preview-box" id="selected-color"></div>
-  </div>
+    <div class="palette" id="palette"></div>
+    <div class="button-group">
+      <button onclick="fillEntireGrid()" title="Fill Grid (F)">[F] FILL</button>
+      <button onclick="clearGrid()" title="Clear Grid (C)">[C] CLEAR</button>
+      <button onclick="undo()" title="Undo (U)">[U] UNDO</button>
+      <button onclick="redo()" title="Redo (R)">[R] REDO</button>
+      <button onclick="toggleDragMode()" title="Toggle Drag Mode (D)">
+        [D] DRAG: <span id="drag-mode-text">ON</span>
+      </button>
+      <button onclick="toggleRats()" title="Toggle Noise (T)">
+        [T] NOISE: <span id="rats-text">HIGH</span>
+      </button>
+      <button onclick="saveAsPNG()" title="Save as PNG (S)">[S] SAVE PNG</button>
+      <button onclick="generateLuaTable()" title="Generate Lua (G)">[G] GEN LUA</button>
+      <button onclick="copyLuaTable()" title="Copy Lua (Y)">[Y] COPY LUA</button>
+      <button onclick="pasteLuaTable()" title="Paste Lua (P)">[P] PASTE LUA</button>
+    </div>
 
-  <div class="palette" id="palette"></div>
-  <div class="button-group">
-    <button onclick="fillEntireGrid()" data-tooltip="Fill Entire Grid with Selected Color"><span>🖌️</span> Fill Grid</button>
-    <button onclick="clearGrid()" data-tooltip="Clear Grid to White"><span>🧹</span> Clear Grid</button>
-    <button onclick="undo()" data-tooltip="Undo Last Action (Ctrl+Z)"><span>⏪</span> Undo</button>
-    <button onclick="redo()" data-tooltip="Redo Last Action (Ctrl+Y)"><span>⏩</span> Redo</button>
-    <button onclick="toggleDragMode()" data-tooltip="Toggle Drag to Paint Mode">
-      <span>🎨</span> <span id="drag-mode-text">Drag to Paint: ON</span>
-    </button>
-    <button onclick="toggleRats()" data-tooltip="Toggle Rat Animation Intensity">
-      <span>🐀</span> <span id="rats-text">Rats: High</span>
-    </button>
-    <button id="music-toggle-button" onclick="toggleMusic()" data-tooltip="Toggle Background Music" style="display: none;">
-      <span id="music-icon">🔊</span> <span id="music-text">Music: ON</span>
-    </button>
-  </div>
-
-  <div class="panel">
-    <div class="container">
-      <div class="section">
-        <h2>Flag Grid</h2>
-        <div class="grid" id="flag-grid"></div>
-      </div>
-      <div class="section">
-        <h2>In-Game Preview</h2>
-        <div class="preview-grid" id="in-game-preview"></div>
-        <button onclick="saveAsPNG()" data-tooltip="Save Flag as PNG (Ctrl+S)"><span>💾</span> Save as PNG</button>
-      </div>
-      <div class="lua-section">
-        <h2>Lua Output</h2>
-        <div class="lua-buttons">
-          <button onclick="generateLuaTable()" data-tooltip="Generate Lua Table for Submission"><span>📜</span> Generate Lua Table</button>
-          <button onclick="copyLuaTable()" data-tooltip="Copy Lua Table to Clipboard"><span>📋</span> Copy</button>
-          <button onclick="pasteLuaTable()" data-tooltip="Paste Lua Table from Clipboard"><span>📝</span> Paste Lua File</button>
+    <div class="panel">
+      <div class="container">
+        <div class="section">
+          <h2>FLAG GRID</h2>
+          <div class="grid" id="flag-grid"></div>
         </div>
-        <div class="output" id="lua-output"></div>
-        <div class="discord-note" id="discord-note" style="display: none">
-          Please copy and send the above Lua table to <strong>@karl_sr</strong> on Discord and we will get your flag added as soon as possible!
+        <div class="section">
+          <h2>PREVIEW</h2>
+          <div class="preview-grid" id="in-game-preview"></div>
+        </div>
+        <div class="lua-section">
+          <h2>LUA OUTPUT</h2>
+          <div class="output" id="lua-output"></div>
+          <div class="discord-note" id="discord-note" style="display: none">
+            SEND LUA TO @KARL_SR ON DISCORD
+          </div>
         </div>
       </div>
     </div>
@@ -455,25 +364,18 @@
   <canvas id="flag-canvas" width="360" height="300" style="display:none;"></canvas>
 
   <script>
+    // Global variables
     const paletteColors = [
-      "#000000", // 0: Black
-      "#00007F", // 1: Dark Blue
-      "#007F00", // 2: Dark Green
-      "#007F7F", // 3: Dark Cyan
-      "#7F0000", // 4: Dark Red
-      "#7F007F", // 5: Dark Purple
-      "#7F3F00", // 6: Dark Orange/Brown
-      "#7F7F7F", // 7: Light Gray
-      "#3F3F3F", // 8: Dark Gray
-      "#3F3FFF", // 9: Light Blue
-      "#3FFF3F", // 10: Light Green
-      "#3FFFFF", // 11: Light Cyan
-      "#FF3F3F", // 12: Light Red
-      "#FF3FFF", // 13: Magenta
-      "#FFFF3F", // 14: Yellow
-      "#FFFFFF"  // 15: White
+      "#000000", "#00007F", "#007F00", "#007F7F", "#7F0000", "#7F007F", "#7F3F00",
+      "#7F7F7F", "#3F3F3F", "#3F3FFF", "#3FFF3F", "#3FFFFF", "#FF3F3F", "#FF3FFF",
+      "#FFFF3F", "#FFFFFF"
     ];
-    const gridData = Array.from({ length: 5 }, () => Array(12).fill(16));
+    const colorNames = [
+      "BLACK", "DARK BLUE", "DARK GREEN", "DARK CYAN", "DARK RED", "DARK PURPLE",
+      "DARK ORANGE", "LIGHT GRAY", "DARK GRAY", "LIGHT BLUE", "LIGHT GREEN",
+      "LIGHT CYAN", "LIGHT RED", "MAGENTA", "YELLOW", "WHITE"
+    ];
+    let gridData = Array.from({ length: 5 }, () => Array(12).fill(16));
     let selectedColor = 1;
     let isPainting = false;
     let history = [];
@@ -481,356 +383,121 @@
     let dragMode = true;
     let ratIntensity = 'high';
     let lastRatUpdate = 0;
-    const RAT_UPDATE_INTERVAL = 50;
+    const RAT_UPDATE_INTERVAL = 500; // Torturously slow for ancient teletype
+    let palette, selectedColorBox, selectedColorName, flagGrid, inGamePreview,
+        luaOutput, discordNote, canvas, ctx, errorPopup, loadingSpinner,
+        bootScreen, mainContent, ratContainer, rats = [], selectedColorIndex = 0;
+    let clickSound;
 
-    const palette = document.getElementById("palette");
-    const selectedColorBox = document.getElementById("selected-color");
-    const flagGrid = document.getElementById("flag-grid");
-    const inGamePreview = document.getElementById("in-game-preview");
-    const luaOutput = document.getElementById("lua-output");
-    const discordNote = document.getElementById("discord-note");
-    const canvas = document.getElementById("flag-canvas");
-    const ctx = canvas.getContext("2d");
-    const errorPopup = document.getElementById("error-popup");
-    const loadingSpinner = document.getElementById("loading-spinner");
-    const ratContainer = document.getElementById('rat-container');
-    let rats = [];
-    let selectedColorIndex = 0;
-
-    // Background Music Setup
-    const backgroundMusic = document.getElementById("background-music");
-    const musicToggleButton = document.getElementById("music-toggle-button");
-    let isMusicPlaying = true;
-    let hasMusicStarted = false;
-
-    // Log audio element and source
-    console.log("Background Music Element:", backgroundMusic);
-    console.log("Audio Source URL:", backgroundMusic.src);
-
-    // Set initial volume to 20%
-    backgroundMusic.volume = 0.2;
-    console.log("Initial Volume Set to:", backgroundMusic.volume);
-
-    // Function to attempt playing music
-    function attemptPlayMusic() {
-      if (hasMusicStarted) return;
-      backgroundMusic.play()
-        .then(() => {
-          console.log("Background music started playing successfully.");
-          hasMusicStarted = true;
-          // Show the music toggle button
-          musicToggleButton.style.display = 'inline-flex';
-        })
-        .catch(err => {
-          console.error("Failed to play background music:", err.message);
-          // Optionally show an error, but let's keep the UI clean as requested
-          console.log("Music playback failed. User can toggle music manually if needed.");
-        });
-    }
-
-    // Function to toggle music
-    function toggleMusic() {
-      isMusicPlaying = !isMusicPlaying;
-      if (isMusicPlaying) {
-        backgroundMusic.play()
-          .then(() => {
-            console.log("Background music started playing successfully.");
-            hasMusicStarted = true;
-            document.getElementById('music-icon').textContent = "🔊";
-            document.getElementById('music-text').textContent = "Music: ON";
-          })
-          .catch(err => {
-            console.error("Failed to play background music:", err.message);
-          });
-      } else {
-        backgroundMusic.pause();
-        console.log("Background music paused.");
-        document.getElementById('music-icon').textContent = "🔇";
-        document.getElementById('music-text').textContent = "Music: OFF";
-      }
-      clickSound.play();
-    }
-
-    // Helper function to map Lua indices to paletteColors
-    function getColorIndex(luaIndex) {
-      if (luaIndex === 0) return 15;
-      return luaIndex - 1;
-    }
-
-    // Rat Animation System
-    const ratColors = ['#FF55FF', '#55FFFF', '#FF5555', '#55FF55', '#FFFF55', '#5555FF'];
-    let mouseX = 0, mouseY = 0;
-
-    function initRats() {
-      console.log(`Initializing ${ratIntensity} rat animation...`);
-      ratContainer.innerHTML = '';
-      rats = [];
-      const count = ratIntensity === 'high' ? 60 : 10;
-      for (let i = 0; i < count; i++) {
-        const rat = document.createElement('div');
-        rat.className = 'rat';
-        rat.textContent = '🐀';
-        rat.style.color = ratColors[Math.floor(Math.random() * ratColors.length)];
-        const isForeground = Math.random() < 0.3;
-        rat.style.zIndex = isForeground ? 2 : -1;
-        rat.style.opacity = isForeground ? 0.6 : 0.3;
-        rat.style.fontSize = `${15 + Math.random() * (isForeground ? 25 : 15)}px`;
-        ratContainer.appendChild(rat);
-        rats.push({
-          element: rat,
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          vx: (Math.random() - 0.5) * 4,
-          vy: (Math.random() - 0.5) * 4,
-          rotation: Math.random() * 360,
-          scale: 0.8 + Math.random() * 0.4,
-          fade: 0.3 + Math.random() * 0.4
-        });
-      }
-      console.log(`Created ${rats.length} rats`);
-    }
-
-    document.addEventListener('mousemove', e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-
-    document.addEventListener('touchmove', e => {
-      if (e.touches.length > 0) {
-        mouseX = e.touches[0].clientX;
-        mouseY = e.touches[0].clientY;
-      }
-    });
-
-    function animateRats(timestamp) {
-      if (timestamp - lastRatUpdate < RAT_UPDATE_INTERVAL) {
-        requestAnimationFrame(animateRats);
-        return;
-      }
-      lastRatUpdate = timestamp;
-
-      rats.forEach(rat => {
-        const dx = mouseX - rat.x;
-        const dy = mouseY - rat.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 200) {
-          const force = (200 - dist) * 0.01;
-          rat.vx += (dx / dist) * force;
-          rat.vy += (dy / dist) * force;
-        }
-        rat.x += rat.vx;
-        rat.y += rat.vy;
-        if (rat.x < 0 || rat.x > window.innerWidth) rat.vx *= -1;
-        if (rat.y < 0 || rat.y > window.innerHeight) rat.vy *= -1;
-        rat.rotation += (Math.random() - 0.5) * 10;
-        rat.scale = 0.8 + Math.sin(Date.now() * 0.002 + rat.x) * 0.2;
-        rat.fade = 0.3 + Math.sin(Date.now() * 0.003 + rat.y) * 0.3;
-        rat.element.style.transform = `translate(${rat.x}px, ${rat.y}px) rotate(${rat.rotation}deg) scale(${rat.scale})`;
-        rat.element.style.opacity = rat.fade;
-      });
-      requestAnimationFrame(animateRats);
-    }
-
-    window.addEventListener('resize', () => {
-      initRats();
-    });
-
-    function toggleRats() {
-      ratIntensity = ratIntensity === 'high' ? 'low' : 'high';
-      document.getElementById('rats-text').textContent = `Rats: ${ratIntensity.charAt(0).toUpperCase() + ratIntensity.slice(1)}`;
-      initRats();
-      clickSound.play();
-    }
-
-    initRats();
-    requestAnimationFrame(animateRats);
-
-    // Audio for interactions
-    const clickSound = new Audio('https://www.freesound.org/data/previews/171/171670_1015242-lq.mp3');
-
-    // Palette Setup with Keyboard Navigation
-    paletteColors.forEach((color, i) => {
-      const swatch = document.createElement("div");
-      swatch.className = "color";
-      swatch.style.background = color;
-      swatch.dataset.hex = color;
-      swatch.tabIndex = 0;
-      swatch.onclick = () => {
-        selectColor(i);
-        clickSound.play();
-      };
-      swatch.onkeydown = (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectColor(i);
-          clickSound.play();
-        }
-      };
-      palette.appendChild(swatch);
-    });
-
+    // Global functions
     function selectColor(i) {
       selectedColor = i + 1;
       selectedColorBox.style.background = paletteColors[i];
+      selectedColorName.textContent = colorNames[i];
       selectedColorIndex = i;
       const swatches = document.querySelectorAll('.color');
       swatches.forEach(s => s.classList.remove('selected'));
       swatches[i].classList.add('selected');
-      console.log(`Selected color: Lua index ${selectedColor} (paletteColors[${i}]: ${paletteColors[i]})`);
     }
 
-    document.addEventListener('keydown', e => {
-      const swatches = document.querySelectorAll('.color');
-      if (e.key === 'ArrowRight') {
-        selectedColorIndex = (selectedColorIndex + 1) % paletteColors.length;
-        swatches[selectedColorIndex].focus();
-        selectColor(selectedColorIndex);
-        clickSound.play();
-      } else if (e.key === 'ArrowLeft') {
-        selectedColorIndex = (selectedColorIndex - 1 + paletteColors.length) % paletteColors.length;
-        swatches[selectedColorIndex].focus();
-        selectColor(selectedColorIndex);
-        clickSound.play();
-      } else if (e.key === 'ArrowDown') {
-        selectedColorIndex = (selectedColorIndex + 8) % paletteColors.length;
-        swatches[selectedColorIndex].focus();
-        selectColor(selectedColorIndex);
-        clickSound.play();
-      } else if (e.key === 'ArrowUp') {
-        selectedColorIndex = (selectedColorIndex - 8 + paletteColors.length) % paletteColors.length;
-        swatches[selectedColorIndex].focus();
-        selectColor(selectedColorIndex);
-        clickSound.play();
+    function generateLuaTable() {
+      const lua = gridData.map(row => `  {${row.join(',')}}`).join(',\n');
+      luaOutput.textContent = `{\n${lua}\n}`;
+      discordNote.style.display = 'block';
+      clickSound.play();
+    }
+
+    function copyLuaTable() {
+      const text = luaOutput.textContent;
+      if (!text) {
+        showError('NO LUA TO COPY');
+        return;
       }
-    });
-
-    function renderGrid() {
-      console.log('Rendering flag grid...');
-      flagGrid.innerHTML = '';
-      for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 12; c++) {
-          const cell = document.createElement("div");
-          cell.className = "cell";
-          const colorIndex = getColorIndex(gridData[r][c]);
-          console.log(`Grid [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
-          cell.style.background = paletteColors[colorIndex];
-          cell.onmousedown = (e) => {
-            e.preventDefault();
-            if (e.button === 2) {
-              pickColorFromCell(r, c);
-              return;
-            }
-            isPainting = true;
-            gridData[r][c] = selectedColor;
-            cell.style.background = paletteColors[getColorIndex(selectedColor)];
-            cell.classList.add('painted');
-            if (isMusicPlaying) attemptPlayMusic();
-            saveState();
-            renderInGamePreview();
-            clickSound.play();
-          };
-          cell.ontouchstart = (e) => {
-            e.preventDefault();
-            isPainting = true;
-            gridData[r][c] = selectedColor;
-            cell.style.background = paletteColors[getColorIndex(selectedColor)];
-            cell.classList.add('painted');
-            if (isMusicPlaying) attemptPlayMusic();
-            saveState();
-            renderInGamePreview();
-            clickSound.play();
-          };
-          cell.onmouseover = () => {
-            if (isPainting && dragMode) {
-              gridData[r][c] = selectedColor;
-              cell.style.background = paletteColors[getColorIndex(selectedColor)];
-              cell.classList.add('painted');
-              if (isMusicPlaying) attemptPlayMusic();
-              saveState();
-              renderInGamePreview();
-              clickSound.play();
-            }
-          };
-          cell.ontouchmove = (e) => {
-            if (isPainting && dragMode) {
-              const touch = e.touches[0];
-              const target = document.elementFromPoint(touch.clientX, touch.clientY);
-              if (target && target.classList.contains('cell')) {
-                const cells = Array.from(flagGrid.children);
-                const index = cells.indexOf(target);
-                if (index !== -1) {
-                  const tr = Math.floor(index / 12);
-                  const tc = index % 12;
-                  gridData[tr][tc] = selectedColor;
-                  target.style.background = paletteColors[getColorIndex(selectedColor)];
-                  target.classList.add('painted');
-                  if (isMusicPlaying) attemptPlayMusic();
-                  saveState();
-                  renderInGamePreview();
-                  clickSound.play();
-                }
-              }
-            }
-          };
-          cell.onmouseup = () => isPainting = false;
-          cell.ontouchend = () => isPainting = false;
-          cell.onclick = () => {
-            if (!dragMode) {
-              gridData[r][c] = selectedColor;
-              cell.style.background = paletteColors[getColorIndex(selectedColor)];
-              cell.classList.add('painted');
-              if (isMusicPlaying) attemptPlayMusic();
-              saveState();
-              renderInGamePreview();
-              clickSound.play();
-            }
-          };
-          cell.oncontextmenu = (e) => {
-            e.preventDefault();
-            pickColorFromCell(r, c);
-          };
-          flagGrid.appendChild(cell);
-        }
-      }
-      document.body.onmouseup = () => isPainting = false;
-      document.body.ontouchend = () => isPainting = false;
-      document.body.onmouseleave = () => isPainting = false;
+      navigator.clipboard.writeText(text)
+        .then(() => showError('LUA COPIED', false))
+        .catch(() => showError('COPY FAILED'));
+      clickSound.play();
     }
 
-    function pickColorFromCell(r, c) {
-      const luaIndex = gridData[r][c];
-      const colorIndex = getColorIndex(luaIndex);
-      selectColor(colorIndex);
-      showError(`Picked color: ${paletteColors[colorIndex]}`, false);
-      console.log(`Picked color from cell [${r}][${c}]: Lua index ${luaIndex} (paletteColors[${colorIndex}]: ${paletteColors[colorIndex]})`);
-    }
-
-    function renderInGamePreview() {
-      console.log('Rendering in-game preview...');
-      inGamePreview.innerHTML = '';
-      let cellCount = 0;
+    function saveAsPNG() {
       for (let r = 0; r < 5; r++) {
         for (let repeat = 0; repeat < 2; repeat++) {
           for (let c = 0; c < 12; c++) {
-            const cell = document.createElement("div");
-            cell.className = "preview-cell";
             const colorIndex = getColorIndex(gridData[r][c]);
-            console.log(`Preview [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
-            cell.style.background = paletteColors[colorIndex];
-            inGamePreview.appendChild(cell);
-            cellCount++;
+            ctx.fillStyle = paletteColors[colorIndex];
+            ctx.fillRect(c * 30, (r * 2 + repeat) * 30, 30, 30);
           }
         }
       }
-      console.log(`Appended ${cellCount} cells to in-game preview`);
+      const link = document.createElement('a');
+      link.download = 'FLAG.PNG';
+      link.href = canvas.toDataURL();
+      link.click();
+      clickSound.play();
+      showError('PNG SAVED', false);
     }
 
-    function saveState() {
-      const state = gridData.map(row => [...row]);
-      history = history.slice(0, historyIndex + 1);
-      history.push(state);
-      historyIndex++;
-      updateUndoRedoButtons();
+    async function pasteLuaTable() {
+      loadingSpinner.style.display = 'block';
+      let content;
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          content = await navigator.clipboard.readText();
+          if (!content) {
+            throw new Error('CLIPBOARD EMPTY');
+          }
+        } else {
+          throw new Error('CLIPBOARD NOT SUPPORTED');
+        }
+      } catch (err) {
+        console.log('Clipboard access failed:', err.message);
+        content = prompt("CLIPBOARD FAILED. PASTE LUA:", "");
+        if (!content) {
+          loadingSpinner.style.display = 'none';
+          showError('NO LUA PASTED');
+          return;
+        }
+      }
+
+      try {
+        const matches = [...content.matchAll(/(\d+)/g)].map(m => parseInt(m[1]));
+        if (matches.length === 5 * 12) {
+          matches.forEach((index, i) => {
+            const r = Math.floor(i / 12);
+            const c = i % 12;
+            if (index >= 0 && index <= 16) {
+              gridData[r][c] = index;
+            } else {
+              throw new Error('INVALID COLOR');
+            }
+          });
+          renderGrid();
+          renderInGamePreview();
+          saveState();
+          loadingSpinner.style.display = 'none';
+          showError('LUA LOADED', false);
+        } else {
+          loadingSpinner.style.display = 'none';
+          showError('INVALID LUA FORMAT');
+        }
+      } catch (err) {
+        loadingSpinner.style.display = 'none';
+        showError('ERROR: ' + err.message);
+      }
+      clickSound.play();
+    }
+
+    function toggleRats() {
+      ratIntensity = ratIntensity === 'high' ? 'low' : 'high';
+      document.getElementById('rats-text').textContent = ratIntensity.toUpperCase();
+      initRats();
+      clickSound.play();
+    }
+
+    function toggleDragMode() {
+      dragMode = !dragMode;
+      document.getElementById('drag-mode-text').textContent = dragMode ? 'ON' : 'OFF';
+      clickSound.play();
     }
 
     function undo() {
@@ -863,19 +530,6 @@
       }
     }
 
-    function updateUndoRedoButtons() {
-      const undoBtn = document.querySelector('button[onclick="undo"]');
-      const redoBtn = document.querySelector('button[onclick="redo"]');
-      if (undoBtn) undoBtn.disabled = historyIndex <= 0;
-      if (redoBtn) redoBtn.disabled = historyIndex >= history.length - 1;
-    }
-
-    function toggleDragMode() {
-      dragMode = !dragMode;
-      document.getElementById('drag-mode-text').textContent = `Drag to Paint: ${dragMode ? 'ON' : 'OFF'}`;
-      clickSound.play();
-    }
-
     function clearGrid() {
       for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 12; c++) {
@@ -900,123 +554,366 @@
       clickSound.play();
     }
 
-    function generateLuaTable() {
-      const lua = gridData.map(row => `  {${row.join(',')}}`).join(',\n');
-      luaOutput.textContent = `{\n${lua}\n}`;
-      discordNote.style.display = 'block';
-      clickSound.play();
+    // Helper functions
+    function getColorIndex(luaIndex) {
+      if (luaIndex === 0) return 15;
+      return luaIndex - 1;
     }
 
-    function copyLuaTable() {
-      const text = luaOutput.textContent;
-      if (!text) {
-        showError('No Lua table to copy!');
-        return;
-      }
-      navigator.clipboard.writeText(text)
-        .then(() => showError('Lua table copied to clipboard!', false))
-        .catch(() => showError('Failed to copy.'));
-      clickSound.play();
+    function pickColorFromCell(r, c) {
+      const luaIndex = gridData[r][c];
+      const colorIndex = getColorIndex(luaIndex);
+      selectColor(colorIndex);
+      showError(`COLOR: ${colorNames[colorIndex]}`, false);
     }
 
-    async function pasteLuaTable() {
-      loadingSpinner.style.display = 'block';
-      let content;
-      try {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          content = await navigator.clipboard.readText();
-          if (!content) {
-            throw new Error('Clipboard is empty.');
-          }
-        } else {
-          throw new Error('Clipboard API not supported.');
-        }
-      } catch (err) {
-        console.log('Clipboard access failed:', err.message);
-        content = prompt("Clipboard access failed. Please paste your Lua table here:", "");
-        if (!content) {
-          loadingSpinner.style.display = 'none';
-          showError('No Lua table pasted.');
-          return;
-        }
-      }
-
-      try {
-        const matches = [...content.matchAll(/(\d+)/g)].map(m => parseInt(m[1]));
-        if (matches.length === 5 * 12) {
-          matches.forEach((index, i) => {
-            const r = Math.floor(i / 12);
-            const c = i % 12;
-            if (index >= 0 && index <= 16) {
-              gridData[r][c] = index;
-            } else {
-              throw new Error('Invalid color index');
+    function renderGrid() {
+      flagGrid.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        const row = document.createElement("div");
+        row.className = "grid-row";
+        for (let c = 0; c < 12; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          const colorIndex = getColorIndex(gridData[r][c]);
+          cell.textContent = colorIndex === 15 ? '.' : '#';
+          cell.style.background = paletteColors[colorIndex];
+          cell.style.color = colorIndex === 15 ? '#B0B0B0' : paletteColors[colorIndex];
+          cell.onmousedown = (e) => {
+            e.preventDefault();
+            if (e.button === 2) {
+              pickColorFromCell(r, c);
+              return;
             }
-          });
-          renderGrid();
-          renderInGamePreview();
-          saveState();
-          loadingSpinner.style.display = 'none';
-          showError('Lua table loaded from clipboard!', false);
-        } else {
-          loadingSpinner.style.display = 'none';
-          showError('Invalid Lua table format or wrong grid size.');
+            isPainting = true;
+            gridData[r][c] = selectedColor;
+            cell.textContent = selectedColor === 16 ? '.' : '#';
+            cell.style.background = paletteColors[getColorIndex(selectedColor)];
+            cell.style.color = selectedColor === 16 ? '#B0B0B0' : paletteColors[getColorIndex(selectedColor)];
+            saveState();
+            renderInGamePreview();
+            clickSound.play();
+          };
+          cell.ontouchstart = (e) => {
+            e.preventDefault();
+            isPainting = true;
+            gridData[r][c] = selectedColor;
+            cell.textContent = selectedColor === 16 ? '.' : '#';
+            cell.style.background = paletteColors[getColorIndex(selectedColor)];
+            cell.style.color = selectedColor === 16 ? '#B0B0B0' : paletteColors[getColorIndex(selectedColor)];
+            saveState();
+            renderInGamePreview();
+            clickSound.play();
+          };
+          cell.onmouseover = () => {
+            if (isPainting && dragMode) {
+              gridData[r][c] = selectedColor;
+              cell.textContent = selectedColor === 16 ? '.' : '#';
+              cell.style.background = paletteColors[getColorIndex(selectedColor)];
+              cell.style.color = selectedColor === 16 ? '#B0B0B0' : paletteColors[getColorIndex(selectedColor)];
+              saveState();
+              renderInGamePreview();
+              clickSound.play();
+            }
+          };
+          cell.ontouchmove = (e) => {
+            if (isPainting && dragMode) {
+              const touch = e.touches[0];
+              const target = document.elementFromPoint(touch.clientX, touch.clientY);
+              if (target && target.classList.contains('cell')) {
+                const cells = Array.from(flagGrid.querySelectorAll('.cell'));
+                const index = cells.indexOf(target);
+                if (index !== -1) {
+                  const tr = Math.floor(index / 12);
+                  const tc = index % 12;
+                  gridData[tr][tc] = selectedColor;
+                  target.textContent = selectedColor === 16 ? '.' : '#';
+                  target.style.background = paletteColors[getColorIndex(selectedColor)];
+                  target.style.color = selectedColor === 16 ? '#B0B0B0' : paletteColors[getColorIndex(selectedColor)];
+                  saveState();
+                  renderInGamePreview();
+                  clickSound.play();
+                }
+              }
+            }
+          };
+          cell.onmouseup = () => isPainting = false;
+          cell.ontouchend = () => isPainting = false;
+          cell.onclick = () => {
+            if (!dragMode) {
+              gridData[r][c] = selectedColor;
+              cell.textContent = selectedColor === 16 ? '.' : '#';
+              cell.style.background = paletteColors[getColorIndex(selectedColor)];
+              cell.style.color = selectedColor === 16 ? '#B0B0B0' : paletteColors[getColorIndex(selectedColor)];
+              saveState();
+              renderInGamePreview();
+              clickSound.play();
+            }
+          };
+          cell.oncontextmenu = (e) => {
+            e.preventDefault();
+            pickColorFromCell(r, c);
+          };
+          row.appendChild(cell);
         }
-      } catch (err) {
-        loadingSpinner.style.display = 'none';
-        showError('Error parsing Lua table: ' + err.message);
+        flagGrid.appendChild(row);
       }
-      clickSound.play();
+      document.body.onmouseup = () => isPainting = false;
+      document.body.ontouchend = () => isPainting = false;
+      document.body.onmouseleave = () => isPainting = false;
+    }
+
+    function renderInGamePreview() {
+      inGamePreview.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        for (let repeat = 0; repeat < 2; repeat++) {
+          const row = document.createElement("div");
+          row.className = "preview-row";
+          for (let c = 0; c < 12; c++) {
+            const cell = document.createElement("div");
+            cell.className = "preview-cell";
+            const colorIndex = getColorIndex(gridData[r][c]);
+            cell.style.background = paletteColors[colorIndex];
+            cell.style.color = paletteColors[colorIndex];
+            cell.textContent = '#'; // Seamless preview
+            row.appendChild(cell);
+          }
+          inGamePreview.appendChild(row);
+        }
+      }
+    }
+
+    function saveState() {
+      const state = gridData.map(row => [...row]);
+      history = history.slice(0, historyIndex + 1);
+      history.push(state);
+      historyIndex++;
+      updateUndoRedoButtons();
+    }
+
+    function updateUndoRedoButtons() {
+      const undoBtn = document.querySelector('button[onclick="undo"]');
+      const redoBtn = document.querySelector('button[onclick="redo"]');
+      if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+      if (redoBtn) redoBtn.disabled = historyIndex >= history.length - 1;
     }
 
     function showError(message, isError = true) {
       errorPopup.textContent = message;
-      errorPopup.style.background = isError ? 'rgba(80, 0, 0, 0.9)' : 'rgba(0, 80, 0, 0.9)';
+      errorPopup.style.background = isError ? '#000000' : '#B0B0B0';
+      errorPopup.style.color = isError ? '#B0B0B0' : '#000000';
       errorPopup.style.display = 'block';
       setTimeout(() => {
         errorPopup.style.display = 'none';
       }, 3000);
     }
 
-    function saveAsPNG() {
-      for (let r = 0; r < 5; r++) {
-        for (let repeat = 0; repeat < 2; repeat++) {
-          for (let c = 0; c < 12; c++) {
-            const colorIndex = getColorIndex(gridData[r][c]);
-            console.log(`PNG [${r}][${c}]: Lua index ${gridData[r][c]} maps to paletteColors[${colorIndex}] (${paletteColors[colorIndex]})`);
-            ctx.fillStyle = paletteColors[colorIndex];
-            ctx.fillRect(c * 30, (r * 2 + repeat) * 30, 30, 30);
-          }
-        }
+    function initRats() {
+      ratContainer.innerHTML = '';
+      rats = [];
+      const count = ratIntensity === 'high' ? 2 : 1; // Barely alive terminal
+      for (let i = 0; i < count; i++) {
+        const rat = document.createElement('div');
+        rat.className = 'rat';
+        rat.textContent = '*';
+        rat.style.color = '#B0B0B0';
+        rat.style.zIndex = -1;
+        rat.style.opacity = 0.3;
+        rat.style.fontSize = '14px';
+        ratContainer.appendChild(rat);
+        rats.push({
+          element: rat,
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: (Math.random() - 0.5) * 0.15
+        });
       }
-      const link = document.createElement('a');
-      link.download = 'flag.png';
-      link.href = canvas.toDataURL();
-      link.click();
-      clickSound.play();
-      showError('Flag saved as PNG!', false);
     }
 
-    document.addEventListener('keydown', e => {
-      if (e.ctrlKey && e.key === 'z') {
-        e.preventDefault();
-        undo();
+    function animateRats(timestamp) {
+      if (timestamp - lastRatUpdate < RAT_UPDATE_INTERVAL) {
+        requestAnimationFrame(animateRats);
+        return;
       }
-      if (e.ctrlKey && e.key === 'y') {
-        e.preventDefault();
-        redo();
+      lastRatUpdate = timestamp;
+
+      rats.forEach(rat => {
+        rat.x += rat.vx;
+        rat.y += rat.vy;
+        if (rat.x < 0 || rat.x > window.innerWidth) rat.vx *= -1;
+        if (rat.y < 0 || rat.y > window.innerHeight) rat.vy *= -1;
+        rat.element.style.transform = `translate(${rat.x}px, ${rat.y}px)`;
+      });
+      requestAnimationFrame(animateRats);
+    }
+
+    // DOM-dependent initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      palette = document.getElementById("palette");
+      selectedColorBox = document.getElementById("selected-color");
+      selectedColorName = document.getElementById("selected-color-name");
+      flagGrid = document.getElementById("flag-grid");
+      inGamePreview = document.getElementById("in-game-preview");
+      luaOutput = document.getElementById("lua-output");
+      discordNote = document.getElementById("discord-note");
+      canvas = document.getElementById("flag-canvas");
+      ctx = canvas.getContext("2d");
+      errorPopup = document.getElementById("error-popup");
+      loadingSpinner = document.getElementById("loading-spinner");
+      bootScreen = document.getElementById("boot-screen");
+      mainContent = document.getElementById("main-content");
+      ratContainer = document.getElementById("rat-container");
+
+      // Initialize audio
+      try {
+        clickSound = new Audio();
+        clickSound.src = 'https://freesound.org/data/previews/171/171671_2435923-lq.mp3';
+        clickSound.onerror = () => {
+          console.warn('Audio failed to load. Disabling sound.');
+          clickSound = { play: () => {} };
+        };
+      } catch (e) {
+        console.warn('Audio initialization failed:', e.message);
+        clickSound = { play: () => {} };
       }
-      if (e.ctrlKey && e.key === 's') {
-        e.preventDefault();
-        saveAsPNG();
+
+      // Boot Sequence with Ultra-Slow Auto-Typing
+      const bootMessages = [
+        "RATS NET FLAG EDITOR v0.1",
+        "COPYRIGHT (C) 1968 RATS NET",
+        "",
+        "MEMORY: 1K OK",
+        "CPU: PDP-8 @ 0.05MHz",
+        "TTY: ASR-28 80x24",
+        "ERROR 0x4D... RECOVERING",
+        "PAPER TAPE: 64 BYTES OK",
+        "TTY JAM DETECTED... CLEARING",
+        "",
+        "LOADING [          ]",
+        "",
+        "*** SYSTEM READY ***",
+        "PRESS KEY TO BEGIN"
+      ];
+
+      async function runBootSequence() {
+        bootScreen.style.display = 'block';
+        let output = '';
+        for (let i = 0; i < bootMessages.length; i++) {
+          if (bootMessages[i].startsWith("LOADING")) {
+            let bar = '';
+            for (let j = 0; j < 10; j++) {
+              bar += '=';
+              output = bootMessages.slice(0, i).join('\n') + `\nLOADING [${bar.padEnd(10, ' ')}]`;
+              bootScreen.textContent = output + (Math.random() < 0.25 ? '\nTTY ERR 0x' + Math.floor(Math.random() * 255).toString(16).toUpperCase() : '');
+              await new Promise(resolve => setTimeout(resolve, 800)); // Torturously slow
+            }
+          } else {
+            for (let char of bootMessages[i]) {
+              output += char;
+              bootScreen.textContent = output + '\n' + (Math.random() < 0.2 ? String.fromCharCode(0x2500 + Math.floor(Math.random() * 16)) + String.fromCharCode(0x2500 + Math.floor(Math.random() * 16)) : '');
+              await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 120)); // Jittery teletype
+            }
+            output += '\n';
+            bootScreen.textContent = output;
+            await new Promise(resolve => setTimeout(resolve, 300));
+            if (Math.random() < 0.1) {
+              bootScreen.textContent += '\n*** TTY MISALIGN ***\n';
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
+        }
+        document.addEventListener('keydown', startMain, { once: true });
+        document.addEventListener('click', startMain, { once: true });
       }
+
+      function startMain() {
+        bootScreen.style.display = 'none';
+        mainContent.style.display = 'block';
+        renderGrid();
+        renderInGamePreview();
+        selectColor(0);
+        saveState();
+        clickSound.play();
+      }
+
+      paletteColors.forEach((color, i) => {
+        const swatch = document.createElement("div");
+        swatch.className = "color";
+        swatch.textContent = `[${i}]`;
+        swatch.style.background = color;
+        swatch.tabIndex = 0;
+        swatch.onclick = () => {
+          selectColor(i);
+          clickSound.play();
+        };
+        swatch.onkeydown = (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectColor(i);
+            clickSound.play();
+          }
+        };
+        palette.appendChild(swatch);
+      });
+
+      document.addEventListener('keydown', e => {
+        const swatches = document.querySelectorAll('.color');
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          selectedColorIndex = (selectedColorIndex + 1) % paletteColors.length;
+          swatches[selectedColorIndex].focus();
+          selectColor(selectedColorIndex);
+          clickSound.play();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          selectedColorIndex = (selectedColorIndex - 1 + paletteColors.length) % paletteColors.length;
+          swatches[selectedColorIndex].focus();
+          selectColor(selectedColorIndex);
+          clickSound.play();
+        } else if (e.key.toLowerCase() === 'f') {
+          fillEntireGrid();
+        } else if (e.key.toLowerCase() === 'c') {
+          clearGrid();
+        } else if (e.key.toLowerCase() === 'u') {
+          undo();
+        } else if (e.key.toLowerCase() === 'r') {
+          redo();
+        } else if (e.key.toLowerCase() === 'd') {
+          toggleDragMode();
+        } else if (e.key.toLowerCase() === 't') {
+          toggleRats();
+        } else if (e.key.toLowerCase() === 's') {
+          saveAsPNG();
+        } else if (e.key.toLowerCase() === 'g') {
+          generateLuaTable();
+        } else if (e.key.toLowerCase() === 'y') {
+          copyLuaTable();
+        } else if (e.key.toLowerCase() === 'p') {
+          pasteLuaTable();
+        }
+      });
+
+      document.addEventListener('mousemove', e => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      document.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+          mouseX = e.touches[0].clientX;
+          mouseY = e.touches[0].clientY;
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        initRats();
+      });
+
+      initRats();
+      requestAnimationFrame(animateRats);
+      runBootSequence();
     });
 
-    // Initialize
-    renderGrid();
-    renderInGamePreview();
-    selectColor(0);
-    saveState();
+    let mouseX = 0, mouseY = 0;
   </script>
 </body>
 </html>
