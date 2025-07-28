@@ -12,10 +12,10 @@
     }
     body {
       margin: 0;
-      background: #000000; /* Black CRT background */
-      color: #B0B0B0; /* Dimmer, flickering gray for ancient teletype */
-      font-family: 'OCR-A', 'Courier New', monospace; /* Blockiest font */
-      font-size: 14px; /* Super big and blocky */
+      background: #000000;
+      color: #B0B0B0;
+      font-family: 'OCR-A', 'Courier New', monospace;
+      font-size: 14px;
       line-height: 1.0;
       display: flex;
       flex-direction: column;
@@ -24,8 +24,8 @@
       min-height: 100vh;
       text-align: left;
       overflow: hidden;
-      animation: flicker 0.25s infinite alternate; /* Intense CRT flicker */
-      background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px); /* Heavy scanlines */
+      animation: flicker 0.25s infinite alternate;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
       background-size: 100% 1.2px;
     }
 
@@ -34,7 +34,7 @@
       100% { opacity: 1; }
     }
 
-    #boot-screen {
+    #boot-screen, #login-screen {
       position: fixed;
       top: 0;
       left: 0;
@@ -48,8 +48,8 @@
       white-space: pre;
       display: none;
       z-index: 1000;
-      border: 4px solid #404040; /* Ultra-thick, worn teletype bezel */
-      animation: phosphor 0.6s infinite alternate; /* Severe phosphor decay */
+      border: 4px solid #404040;
+      animation: phosphor 0.6s infinite alternate;
     }
 
     @keyframes phosphor {
@@ -57,10 +57,27 @@
       100% { color: #707070; }
     }
 
+    #login-screen textarea {
+      background: #000000;
+      color: #B0B0B0;
+      font-family: 'OCR-A', 'Courier New', monospace;
+      font-size: 14px;
+      border: 2px solid #B0B0B0;
+      width: 80ch;
+      max-width: 100%;
+      resize: none;
+      padding: 3px;
+    }
+
+    #login-screen textarea:focus {
+      outline: none;
+      background: #404040;
+    }
+
     #main-content {
       display: none;
       width: 100%;
-      max-width: 80ch; /* 80-character terminal width */
+      max-width: 80ch;
     }
 
     #rat-container {
@@ -81,7 +98,7 @@
     }
 
     h1 {
-      font-size: 16px; /* Bigger, blockier header */
+      font-size: 16px;
       font-weight: normal;
       margin: 5px 0;
       border-top: 3px solid #B0B0B0;
@@ -183,7 +200,7 @@
 
     .preview-row {
       display: flex;
-      gap: 0; /* Seamless preview */
+      gap: 0;
     }
 
     .cell, .preview-cell {
@@ -277,7 +294,7 @@
     }
 
     @media (max-width: 768px) {
-      body, #boot-screen, .palette, .grid, .preview-grid, .output, button, h1, h2, .color, .cell, .preview-cell {
+      body, #boot-screen, #login-screen, .palette, .grid, .preview-grid, .output, button, h1, h2, .color, .cell, .preview-cell {
         font-size: 12px;
       }
       .color, .cell, .preview-cell {
@@ -290,10 +307,11 @@
         height: 12px;
       }
       h1 { font-size: 14px; }
+      #login-screen textarea { font-size: 12px; }
     }
 
     @media (max-width: 480px) {
-      body, #boot-screen, .palette, .grid, .preview-grid, .output, button, h1, h2, .color, .cell, .preview-cell {
+      body, #boot-screen, #login-screen, .palette, .grid, .preview-grid, .output, button, h1, h2, .color, .cell, .preview-cell {
         font-size: 10px;
       }
       .color, .cell, .preview-cell {
@@ -306,11 +324,13 @@
         height: 10px;
       }
       h1 { font-size: 12px; }
+      #login-screen textarea { font-size: 10px; }
     }
   </style>
 </head>
 <body>
   <div id="boot-screen"></div>
+  <div id="login-screen"></div>
   <div id="main-content">
     <div id="rat-container"></div>
     <div id="error-popup"></div>
@@ -383,10 +403,10 @@
     let dragMode = true;
     let ratIntensity = 'high';
     let lastRatUpdate = 0;
-    const RAT_UPDATE_INTERVAL = 500; // Torturously slow for ancient teletype
+    const RAT_UPDATE_INTERVAL = 500;
     let palette, selectedColorBox, selectedColorName, flagGrid, inGamePreview,
         luaOutput, discordNote, canvas, ctx, errorPopup, loadingSpinner,
-        bootScreen, mainContent, ratContainer, rats = [], selectedColorIndex = 0;
+        bootScreen, loginScreen, mainContent, ratContainer, rats = [], selectedColorIndex = 0;
     let clickSound;
 
     // Global functions
@@ -675,7 +695,7 @@
             const colorIndex = getColorIndex(gridData[r][c]);
             cell.style.background = paletteColors[colorIndex];
             cell.style.color = paletteColors[colorIndex];
-            cell.textContent = '#'; // Seamless preview
+            cell.textContent = '#';
             row.appendChild(cell);
           }
           inGamePreview.appendChild(row);
@@ -711,7 +731,7 @@
     function initRats() {
       ratContainer.innerHTML = '';
       rats = [];
-      const count = ratIntensity === 'high' ? 2 : 1; // Barely alive terminal
+      const count = ratIntensity === 'high' ? 2 : 1;
       for (let i = 0; i < count; i++) {
         const rat = document.createElement('div');
         rat.className = 'rat';
@@ -762,6 +782,7 @@
       errorPopup = document.getElementById("error-popup");
       loadingSpinner = document.getElementById("loading-spinner");
       bootScreen = document.getElementById("boot-screen");
+      loginScreen = document.getElementById("login-screen");
       mainContent = document.getElementById("main-content");
       ratContainer = document.getElementById("rat-container");
 
@@ -793,7 +814,21 @@
         "LOADING [          ]",
         "",
         "*** SYSTEM READY ***",
-        "PRESS KEY TO BEGIN"
+        "INITIATING SECURITY PROTOCOL"
+      ];
+
+      // Security Questions
+      const securityQuestions = [
+        "DO YOU HAVE EXPERIENCE WITH FIREARMS? (Y/N)",
+        "ARE YOU AFFILIATED WITH THE JOKER IN ANY WAY?",
+        "WHICH IS THE BEST COMPANY: NEXACO, MONSOTA, OR ULTRACORP?",
+        "HAVE YOU EVER DOUBLE-CROSSED A DISK DEAL? (Y/N)",
+        "WHAT IS YOUR PREFERRED WEAPON IN A CAR CHASE?",
+        "ARE YOU A KNOWN RDMER IN THE CITY?",
+        "HAVE YOU EVER STOLEN A TURBO (S) FROM A RIVAL CORP?",
+        "DO YOU TRUST YOUR MANAGER TO NOT BETRAY YOU? (Y/N)",
+        "WHAT IS THE VALUE OF A DISK IN YOUR LAST DEAL? ($)",
+        "ARE YOU FLUENT IN BRAZILIAN PORTUGUESE? (Y/N)"
       ];
 
       async function runBootSequence() {
@@ -806,13 +841,13 @@
               bar += '=';
               output = bootMessages.slice(0, i).join('\n') + `\nLOADING [${bar.padEnd(10, ' ')}]`;
               bootScreen.textContent = output + (Math.random() < 0.25 ? '\nTTY ERR 0x' + Math.floor(Math.random() * 255).toString(16).toUpperCase() : '');
-              await new Promise(resolve => setTimeout(resolve, 800)); // Torturously slow
+              await new Promise(resolve => setTimeout(resolve, 800));
             }
           } else {
             for (let char of bootMessages[i]) {
               output += char;
               bootScreen.textContent = output + '\n' + (Math.random() < 0.2 ? String.fromCharCode(0x2500 + Math.floor(Math.random() * 16)) + String.fromCharCode(0x2500 + Math.floor(Math.random() * 16)) : '');
-              await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 120)); // Jittery teletype
+              await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 120));
             }
             output += '\n';
             bootScreen.textContent = output;
@@ -823,12 +858,66 @@
             }
           }
         }
-        document.addEventListener('keydown', startMain, { once: true });
-        document.addEventListener('click', startMain, { once: true });
+        runLoginSequence();
+      }
+
+      async function runLoginSequence() {
+        bootScreen.style.display = 'none';
+        loginScreen.style.display = 'block';
+        let output = '=== RATS NET SECURITY PROTOCOL ===\n';
+        let currentQuestion = -1; // -1 for username, 0-9 for questions
+        const inputArea = document.createElement('textarea');
+        inputArea.rows = 1;
+        inputArea.maxLength = 80;
+        loginScreen.appendChild(inputArea); // Append once at the start
+        const textContainer = document.createElement('div');
+        loginScreen.insertBefore(textContainer, inputArea); // Text above textarea
+        inputArea.focus();
+
+        async function displayNextPrompt() {
+          if (currentQuestion === -1) {
+            output += 'ENTER USERNAME: ';
+          } else {
+            output += `${securityQuestions[currentQuestion]}\nRESPONSE: `;
+          }
+          textContainer.textContent = output;
+          inputArea.value = '';
+          inputArea.focus();
+        }
+
+        async function handleInput(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            output += inputArea.value + '\n';
+            output += Math.random() < 0.3 ? `AUTH ERR 0x${Math.floor(Math.random() * 255).toString(16).toUpperCase()}... OVERRIDE\n` : 'VALIDATING...\n';
+            textContainer.textContent = output;
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (Math.random() < 0.1) {
+              output += '*** AUTH MISALIGN ***\n';
+              textContainer.textContent = output;
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            currentQuestion++;
+            if (currentQuestion < securityQuestions.length) {
+              await displayNextPrompt();
+            } else {
+              output += '*** ACCESS GRANTED ***\nPRESS KEY TO BEGIN\n';
+              textContainer.textContent = output;
+              if (inputArea.parentNode === loginScreen) {
+                loginScreen.removeChild(inputArea); // Remove only if still a child
+              }
+              document.addEventListener('keydown', startMain, { once: true });
+              document.addEventListener('click', startMain, { once: true });
+            }
+          }
+        }
+
+        inputArea.addEventListener('keydown', handleInput);
+        await displayNextPrompt();
       }
 
       function startMain() {
-        bootScreen.style.display = 'none';
+        loginScreen.style.display = 'none';
         mainContent.style.display = 'block';
         renderGrid();
         renderInGamePreview();
